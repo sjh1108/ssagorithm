@@ -15,7 +15,7 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_USER: ${{ github.event.pull_request.user.login }}
         run: |
-          MESSAGE="[$PR_TITLE] - $PR_USER\n---\n$PR_BODY"
-          curl -H "Content-Type: application/json" -X POST -d "{
-            \"content\": \"$MESSAGE\"
-          }" "$DISCORD_WEBHOOK_URL"
+          echo "[$PR_TITLE] - $PR_USER\n---\n$PR_BODY" > payload.txt
+          PAYLOAD=$(jq -Rs '{content: .}' < payload.txt)
+          curl -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL"
+

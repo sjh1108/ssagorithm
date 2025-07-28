@@ -77,8 +77,7 @@
             git push --set-upstream origin [브랜치명]
             ```
             
-    9. 이제 github의 레포지토리로 이동하면 new pull 어쩌고가 뜹니다 이제 PR(Pull Request)을 생성해서 작성하시면 됩니다.
-        - 추후에 캡쳐해서 재 작성 해드릴게요
+    9. 이제 github의 레포지토리로 이동하면 Compare & pull request가 뜹니다 이제 PR(Pull Request)을 생성해서 작성하시면 됩니다.
         - PR 생성 시 기본 템플릿을 작성해두었습니다. 해당 템플릿에 맞춰서 작성해주시면 됩니다.
         - PR의 title 형식
             - [Week] 문제번호 - 이름

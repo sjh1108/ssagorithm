@@ -5,7 +5,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
-class Solution
+class week01_보급로_송주헌
 {
 	private static final int MAX_TIME = 1000001;
 	private static int N;

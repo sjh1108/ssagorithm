@@ -9,8 +9,10 @@
     - 송주헌 (스터디장)
         - github : github.com/sjh1108
         - 백준 : solved.ac/profile/thdwngjs1108
+    - 기장선
     - 김회인
     - 박기택
+    - 손홍민
     - 이용호
     - 장상민
 ## 계획

@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
+// 새로운 커밋을 위한 주석
 
-
-public class Main{
+public class Boj1926 {
 	// 재료넣기
 	static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
   static StringTokenizer st;

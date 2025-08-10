@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-// BOJ_3665_줄 세우기
+// BOJ_3665_최종 순위
 
 public class Main_3665_송주헌 {
     private static int N;

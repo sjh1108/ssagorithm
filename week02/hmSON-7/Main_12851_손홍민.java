@@ -1,5 +1,3 @@
-package Rank4.gold_4;
-
 import java.io.*;
 import java.util.*;
 

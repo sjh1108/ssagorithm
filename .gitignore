@@ -1,3 +1,7 @@
 *.txt
 Solution.java
 /.metadata/
+.vscode
+**/.project
+**/classpath
+**/bin/**

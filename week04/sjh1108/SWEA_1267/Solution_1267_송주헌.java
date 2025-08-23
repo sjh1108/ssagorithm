@@ -37,6 +37,7 @@ public class Solution_1267_송주헌{
                 if(cnt[i] == 0) q.add(i); 
             }
  
+            // 위상 정렬 알고리즘 사용
             Queue<Integer> ans = new ArrayDeque<>(V);
             while(!q.isEmpty()){
                 int cur = q.poll();

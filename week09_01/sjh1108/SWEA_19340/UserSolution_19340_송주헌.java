@@ -1,4 +1,4 @@
-package week09_01.sjh1108;
+package week09_01.sjh1108.SWEA_19340;
 
 import java.util.ArrayList;
 import java.util.HashMap;

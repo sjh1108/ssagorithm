@@ -211,6 +211,21 @@ class UserSolution_24992_송주헌
         return 1;
     }
     
+    /*
+     * 고유 번호가 uID인 사용자에게 최대 5개의 영화를 추천한다.
+     * 
+     * 영화를 추천하는 과정은 본문 설명을 참조하라.
+     * 
+     * 추천되는 영화의 수를 RESULT.cnt에 저장하고 추천 순위가 i번째인 영화의 ID를 RESULT.IDs[i – 1]에 저장하고 반환한다. (1 ≤ i ≤ RESULT.cnt)
+     * 
+     * 만약, 추천할 수 있는 영화가 없는 경우 RESULT.cnt에 0을 저장한다.
+     * 
+     * Parameter
+     *   uID : 영화를 추천할 사용자의 고유 번호 (1 ≤ uID ≤ N)
+     * 
+     * Return
+     *   추천되는 영화들. 개수는 RESULT.cnt에 저장하고 추천 순위 순으로 RESULT.IDs에 영화의 ID를 저장한다.
+     */
     Solution_24992_송주헌.RESULT suggest(int uID)
     {
         Solution_24992_송주헌.RESULT res = new Solution_24992_송주헌.RESULT();

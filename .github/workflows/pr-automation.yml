@@ -1,0 +1,57 @@
+# 워크플로우의 이름
+name: Update PR with Solved Problems
+
+# 이 워크플로우가 실행될 시점 지정
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# 실행될 작업(Job) 목록
+jobs:
+  update-pr-body:
+    runs-on: ubuntu-latest
+
+    # GITHUB_TOKEN에 PR 수정(write) 권한을 부여합니다.
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Update problem list in PR body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // ------------------ 스크립트 시작 ------------------
+            const { repo, owner } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+            const prBody = context.payload.pull_request.body || '';
+            const placeholder = '';
+            
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+
+            const problemCommits = commits
+              .map(commit => commit.commit.message.split('\n')[0])
+              .filter(message => {
+                const trimmedMessage = message.trim();
+                return trimmedMessage.startsWith('[BOJ]') || trimmedMessage.startsWith('[SWEA]');
+              });
+
+            let problemListMarkdown = '✅ 이번 주에 푼 문제가 없습니다.';
+            if (problemCommits.length > 0) {
+              problemListMarkdown = problemCommits
+                .map(message => `- ${message.trim()}`)
+                .join('\n');
+            }
+
+            const newBody = prBody.replace(placeholder, problemListMarkdown);
+
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number: prNumber,
+              body: newBody,
+            });
+            // ------------------ 스크립트 끝 ------------------

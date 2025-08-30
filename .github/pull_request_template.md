@@ -1,9 +1,12 @@
 # [N주차] OOO - N문제 풀이
 ---
 
-### 📚 이번 주에 푼 문제
-''
 <br>
+
+### 📚 이번 주에 푼 문제
+<!-- AUTO_GENERATED_PROBLEM_LIST_START -->
+<!-- AUTO_GENERATED_PROBLEM_LIST_END -->
+
 
 ### 💡 새롭게 알게 된 것
 - 

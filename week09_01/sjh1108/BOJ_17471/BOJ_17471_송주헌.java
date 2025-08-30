@@ -8,6 +8,7 @@ public class BOJ_17471_송주헌{
     private static int[] cnt;
     private static boolean[][] link;
 
+    // bit mask the group members
     private static boolean checkLink(int mask){
         int aStart = -1, bStart = -1;
 
@@ -19,6 +20,7 @@ public class BOJ_17471_송주헌{
             }
         }
 
+        // verifying masked members are in the group A
         Queue<Integer> q = new ArrayDeque<>();
         q.add(aStart);
 
@@ -48,6 +50,7 @@ public class BOJ_17471_송주헌{
             }
         }
 
+        // verifying unmasked members are in the group B
         q.clear();
         q.add(bStart);
         visited = new boolean[N+1];
@@ -71,6 +74,7 @@ public class BOJ_17471_송주헌{
         return true;
     }
 
+    // get difference from group of members count
     private static void getDiff(int mask){
         int a = 0, b = 0;
 
@@ -105,6 +109,7 @@ public class BOJ_17471_송주헌{
             }
         }
 
+        // bit mask with brute-force algorithm
         for(int mask = 1; mask < (1 << N) - 1; mask++){
             if(checkLink(mask)){
                 getDiff(mask);

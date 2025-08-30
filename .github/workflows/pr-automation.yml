@@ -1,0 +1,110 @@
+# 워크플로우의 이름
+name: Update PR with Solved Problems
+
+# 이 워크플로우가 실행될 시점 지정
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# 실행될 작업(Job) 목록
+jobs:
+  update-pr-body:
+    runs-on: ubuntu-latest
+
+    # GITHUB_TOKEN에 PR 수정(write) 권한을 부여합니다.
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Update problem list in PR body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // ------------------ 스크립트 시작 ------------------
+            console.log('======== 스크립트 실행 시작 ========');
+
+            const { repo, owner } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+            const prBody = context.payload.pull_request.body || '';
+
+            console.log('1. 현재 PR 본문 (prBody):');
+            console.log('------------------------------------');
+            console.log(prBody);
+            console.log('------------------------------------');
+
+            // 시작과 끝을 나타내는 새로운 마커(marker)를 정의합니다.
+            const startMarker = '<!-- AUTO_GENERATED_PROBLEM_LIST_START -->';
+            const endMarker = '<!-- AUTO_GENERATED_PROBLEM_LIST_END -->';
+
+            // 1. 현재 PR에 포함된 모든 커밋 목록을 가져옵니다.
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+            console.log(`2. PR에서 ${commits.length}개의 커밋을 찾았습니다.`);
+
+            // 2. 커밋 메시지에서 문제 정보를 필터링하고 목록으로 만듭니다.
+            const problemCommits = commits
+              .map(commit => commit.commit.message.split('\n')[0])
+              .filter(message => {
+                const trimmedMessage = message.trim();
+                return trimmedMessage.startsWith('[BOJ]') || trimmedMessage.startsWith('[SWEA]');
+              });
+            console.log(`3. 필터링 후 ${problemCommits.length}개의 문제 커밋을 찾았습니다:`, problemCommits);
+
+            let problemListMarkdown = '✅ 이번 주에 푼 문제가 없습니다.';
+            if (problemCommits.length > 0) {
+              problemListMarkdown = problemCommits
+                .map(message => `- ${message.trim()}`)
+                .join('\n');
+            }
+            console.log('4. 생성된 문제 목록 마크다운 (problemListMarkdown):');
+            console.log('------------------------------------');
+            console.log(problemListMarkdown);
+            console.log('------------------------------------');
+
+            // 3. 시작과 끝 마커 사이에 최신 문제 목록을 포함하는 새로운 블록을 생성합니다.
+            const newBlock = `${startMarker}\n${problemListMarkdown}\n${endMarker}`;
+            
+            // 4. PR 본문에서 기존 블록을 찾아서 새로운 블록으로 교체합니다.
+            const regex = new RegExp(`${startMarker}[\\s\\S]*?${endMarker}`, 'm');
+            
+            let newBody;
+            // 기존 블록이 있다면 교체하고, 없다면 이전 placeholder를 찾아서 교체합니다.
+            if (regex.test(prBody)) {
+                console.log('5. PR 본문에서 시작/끝 마커를 찾았습니다. 내용을 교체합니다.');
+                newBody = prBody.replace(regex, newBlock);
+            } else {
+                console.log('5. PR 본문에서 시작/끝 마커를 찾지 못했습니다.');
+                const oldPlaceholder = '<!-- AUTO_GENERATED_PROBLEM_LIST -->';
+                if (prBody.includes(oldPlaceholder)) {
+                    console.log('   대신 이전 버전의 placeholder를 찾았습니다. 내용을 교체합니다.');
+                    newBody = prBody.replace(oldPlaceholder, newBlock);
+                } else {
+                    console.log('   이전 버전의 placeholder도 찾지 못해 본문을 수정하지 않습니다.');
+                    newBody = prBody; // 아무것도 찾지 못하면 원본을 그대로 둡니다.
+                }
+            }
+
+            console.log('6. 최종적으로 업데이트될 PR 본문 (newBody):');
+            console.log('------------------------------------');
+            console.log(newBody);
+            console.log('------------------------------------');
+
+            // 5. 변경된 내용으로 PR 본문을 업데이트합니다.
+            // 본문에 변경이 있을 때만 API를 호출하도록 수정
+            if (newBody !== prBody) {
+                await github.rest.pulls.update({
+                  owner,
+                  repo,
+                  pull_number: prNumber,
+                  body: newBody,
+                });
+                console.log('7. PR 본문 업데이트를 성공적으로 요청했습니다.');
+            } else {
+                console.log('7. PR 본문에 변경사항이 없어 업데이트를 요청하지 않았습니다.');
+            }
+            console.log('======== 스크립트 실행 종료 ========');
+            // ------------------ 스크립트 끝 ------------------
+

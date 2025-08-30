@@ -11,6 +11,7 @@
         - 백준 : solved.ac/profile/thdwngjs1108
     - 기장선
     - 김회인
+    - 노소연
     - 박기택
     - 손홍민
     - 이용호
@@ -47,14 +48,15 @@
     3. git branch
         - git branch 명령어를 통해서 현재 branch가 무엇인지 확인
     4. git branch [branch명]
-        - ex) git branch feature/week00_name
+        - ex) git branch feature/weekMM_WW_name
         - 이름은 branch에 한글이 들어가는지 몰라서 영어로 했습니다
         - 한글이 되면 한글을 쓰셔도 되며, 한글을 쓰지 않더라도 다른 인원이 식별 할 수 있도록만 해주시면 됩니다
     5. git checkout [branch명]
-        - ex) git checkout feature/week00_name
+        - ex) git checkout feature/weekMM_WW_name
         - 문제 풀이를 업로드 할 브랜치로 이동
     6. 문제 풀이
-        - 이때 Solution.java 활용해서 작성해도 됨, 해당 파일은 깃에 커밋되지 않도록 설정해두었음
+        - 문제를 푼 파일들을 개인 폴더에 모아 각 문제 별로 커밋 해주세요
+        - 이때 문제가 어떤 문제를 풀었는지 확인할 수 있도록 파일명을 작성해주세요
     7. git commit
         - vsc, intelliJ 등 사용 시 gui 활용해서 커밋과 푸시를 해도 됩니다
         - eclipse에선 아직 사용해보지 않아 알려드리기 힘드니 유의해주세요

@@ -24,14 +24,19 @@ jobs:
             const { repo, owner } = context.repo;
             const prNumber = context.payload.pull_request.number;
             const prBody = context.payload.pull_request.body || '';
-            const placeholder = '<!-- AUTO_GENERATED_PROBLEM_LIST -->';
-            
+
+            // 시작과 끝을 나타내는 새로운 마커(marker)를 정의합니다.
+            const startMarker = '<!-- AUTO_GENERATED_PROBLEM_LIST_START -->';
+            const endMarker = '<!-- AUTO_GENERATED_PROBLEM_LIST_END -->';
+
+            // 1. 현재 PR에 포함된 모든 커밋 목록을 가져옵니다.
             const { data: commits } = await github.rest.pulls.listCommits({
               owner,
               repo,
               pull_number: prNumber,
             });
 
+            // 2. 커밋 메시지에서 문제 정보를 필터링하고 목록으로 만듭니다.
             const problemCommits = commits
               .map(commit => commit.commit.message.split('\n')[0])
               .filter(message => {
@@ -46,8 +51,22 @@ jobs:
                 .join('\n');
             }
 
-            const newBody = prBody.replace(placeholder, problemListMarkdown);
+            // 3. 시작과 끝 마커 사이에 최신 문제 목록을 포함하는 새로운 블록을 생성합니다.
+            const newBlock = `${startMarker}\n${problemListMarkdown}\n${endMarker}`;
+            
+            // 4. PR 본문에서 기존 블록을 찾아서 새로운 블록으로 교체합니다.
+            const regex = new RegExp(`${startMarker}[\\s\\S]*?${endMarker}`, 'm');
+            
+            let newBody;
+            // 기존 블록이 있다면 교체하고, 없다면 이전 placeholder를 찾아서 교체합니다.
+            if (regex.test(prBody)) {
+                newBody = prBody.replace(regex, newBlock);
+            } else {
+                const oldPlaceholder = '<!-- AUTO_GENERATED_PROBLEM_LIST -->';
+                newBody = prBody.replace(oldPlaceholder, newBlock);
+            }
 
+            // 5. 변경된 내용으로 PR 본문을 업데이트합니다.
             await github.rest.pulls.update({
               owner,
               repo,
@@ -55,3 +74,4 @@ jobs:
               body: newBody,
             });
             // ------------------ 스크립트 끝 ------------------
+

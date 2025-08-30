@@ -13,6 +13,10 @@ jobs:
   update-pr-body:
     # 최신 Ubuntu 환경에서 실행
     runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      
     # 작업 단계(Step) 목록
     steps:
       # GitHub Actions에서 제공하는 스크립트 실행 도구를 사용

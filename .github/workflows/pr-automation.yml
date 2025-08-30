@@ -1,0 +1,63 @@
+# 워크플로우의 이름
+name: Update PR with Solved Problems
+
+# 이 워크플로우가 실행될 시점 지정
+# Pull Request가 열리거나, 새로운 커밋이 푸시되거나, 다시 열렸을 때 실행됩니다.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# 실행될 작업(Job) 목록
+jobs:
+  # update-pr-body 라는 이름의 작업
+  update-pr-body:
+    # 최신 Ubuntu 환경에서 실행
+    runs-on: ubuntu-latest
+    # 작업 단계(Step) 목록
+    steps:
+      # GitHub Actions에서 제공하는 스크립트 실행 도구를 사용
+      - name: Update problem list in PR body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // ------------------ 스크립트 시작 ------------------
+            const { repo, owner } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+            const prBody = context.payload.pull_request.body || '';
+            const placeholder = '';
+            
+            // 1. 현재 PR에 포함된 모든 커밋 목록을 가져옵니다.
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+
+            // 2. 커밋 메시지에서 문제 정보를 필터링하고 목록으로 만듭니다.
+            //    - 커밋 메시지의 첫 번째 줄만 사용합니다.
+            //    - '[BOJ]' 또는 '[SWEA]'로 시작하는 커밋만 필터링합니다.
+            const problemCommits = commits
+              .map(commit => commit.commit.message.split('\n')[0])
+              .filter(message => {
+                const trimmedMessage = message.trim();
+                return trimmedMessage.startsWith('[BOJ]') || trimmedMessage.startsWith('[SWEA]');
+              });
+
+            let problemListMarkdown = '✅ 이번 주에 푼 문제가 없습니다.';
+            if (problemCommits.length > 0) {
+              problemListMarkdown = problemCommits
+                .map(message => `- ${message.trim()}`)
+                .join('\n');
+            }
+
+            // 3. PR 본문(body)의 placeholder를 생성된 문제 목록으로 교체합니다.
+            const newBody = prBody.replace(placeholder, problemListMarkdown);
+
+            // 4. 변경된 내용으로 PR 본문을 업데이트합니다.
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number: prNumber,
+              body: newBody,
+            });
+            // ------------------ 스크립트 끝 ------------------

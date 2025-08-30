@@ -24,7 +24,7 @@ jobs:
             const { repo, owner } = context.repo;
             const prNumber = context.payload.pull_request.number;
             const prBody = context.payload.pull_request.body || '';
-            const placeholder = '';
+            const placeholder = '<!-- AUTO_GENERATED_PROBLEM_LIST -->';
             
             const { data: commits } = await github.rest.pulls.listCommits({
               owner,

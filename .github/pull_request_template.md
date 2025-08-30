@@ -3,8 +3,6 @@
 
 ### 📚 이번 주에 푼 문제
 <!-- AUTO_GENERATED_PROBLEM_LIST -->
-``
-``
 
 <br>
 

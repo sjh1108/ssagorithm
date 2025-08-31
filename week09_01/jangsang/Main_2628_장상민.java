@@ -1,4 +1,3 @@
-package algo2025_09;
 
 import java.io.BufferedReader;
 import java.io.IOException;

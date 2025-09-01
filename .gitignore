@@ -1,5 +1,6 @@
 *.txt
 ./Solution.java
+./Main.java
 /.metadata/
 .vscode
 **/.project

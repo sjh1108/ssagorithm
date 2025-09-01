@@ -6,3 +6,5 @@
 **/.project
 **/classpath
 **/bin/**
+**/.settings/**
+**/.classpath

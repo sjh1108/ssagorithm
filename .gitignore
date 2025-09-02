@@ -1,7 +1,10 @@
 *.txt
-Solution.java
+./Solution.java
+./Main.java
 /.metadata/
 .vscode
 **/.project
 **/classpath
 **/bin/**
+**/.settings/**
+**/.classpath

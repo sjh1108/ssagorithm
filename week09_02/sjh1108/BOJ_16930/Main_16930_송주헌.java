@@ -1,4 +1,4 @@
-package week09_02.sjh1108;
+package week09_02.sjh1108.BOJ_16930;
 
 import java.io.BufferedReader;
 //import java.io.FileInputStream;

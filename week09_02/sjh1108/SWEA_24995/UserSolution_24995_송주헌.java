@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
-class UserSolution
+class UserSolution_24995_송주헌
 {
     static class Product implements Comparable<Product>{
         int idx;
@@ -136,9 +136,9 @@ class UserSolution
         return group.cnt;
     }
 
-    Solution.RESULT show(int mHow, int mCode)
+    Solution_24995.RESULT show(int mHow, int mCode)
     {
-        Solution.RESULT res = new Solution.RESULT();
+        Solution_24995.RESULT res = new Solution_24995.RESULT();
 
         List<Product> list = new ArrayList<>();
 

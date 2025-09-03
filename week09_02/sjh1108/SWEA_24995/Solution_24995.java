@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-class Solution
+class Solution_24995
 {
     private static final int CMD_INIT           = 100;
     private static final int CMD_SELL           = 200;
@@ -12,7 +12,7 @@ class Solution
     private static final int CMD_DISCOUNT       = 400;
     private static final int CMD_SHOW           = 500;
 
-    private static UserSolution usersolution = new UserSolution();
+    private static UserSolution_24995_송주헌 usersolution = new UserSolution_24995_송주헌();
 
     public static class RESULT
     {

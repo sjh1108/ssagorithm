@@ -1,10 +1,8 @@
-package gold_4;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-public class Main_1107 {
+public class Main_1107_손홍민 {
 	
 	// 알고리즘 분류 : 브루트포스(추가로 간단한 비트마스킹 사용 가능)
 	// 풀이 순서 : 

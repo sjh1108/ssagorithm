@@ -1,12 +1,10 @@
-package gold_4;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.StringTokenizer;
 
-public class Main_1261 {
+public class Main_1261_손홍민 {
 	
 	// 알고리즘 분류 : 다익스트라, 0/1 BFS
 	// 0/1(Zero/One) BFS란? : 

@@ -1,4 +1,4 @@
-package week09_04.sjh1108.BOJ_2162;
+package week09_04.sjh1108.BOJ_2357;
 
 import java.io.*;
 import java.util.*;

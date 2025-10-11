@@ -3,17 +3,13 @@
 ## 초급반
 
 ### [구현](https://www.acmicpc.net/group/workbook/view/24136/82659)
-* [16918 : 봄버맨](https://www.acmicpc.net/problem/16918)
-* [17140 : 이차원 배열과 연산](https://www.acmicpc.net/problem/17140)
-
-### DP(Dynamic Programming)
-* [11408 : 이동하기](https://www.acmicpc.net/problem/11048)
-* [14501 : 퇴사](https://www.acmicpc.net/problem/14501)
+* [1325 : 효율적인 해킹](https://www.acmicpc.net/problem/1325)
+* [30804 : 과일 탕후루](https://www.acmicpc.net/problem/30804)
+* [15652 : N과 M (4)](https://www.acmicpc.net/problem/15652)
+* [11724 : 연결 요소의 개수](https://www.acmicpc.net/problem/11724)
 
 ## 중급반
 
 ### [구현](https://www.acmicpc.net/group/workbook/view/24136/82659)
-* [11559 : Puyo Puyo](https://www.acmicpc.net/problem/11559)
-
-### [DP(Dynamic Programming)](https://www.acmicpc.net/group/workbook/view/24136/83499)
-* [10942 : 팰린드롬?](https://www.acmicpc.net/problem/10942)
+* [14502 : 연구소](https://www.acmicpc.net/problem/14502)
+* [7576 : 토마토](https://www.acmicpc.net/problem/7576)

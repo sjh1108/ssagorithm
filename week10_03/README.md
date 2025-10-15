@@ -4,7 +4,7 @@
 
 ### [구현](https://www.acmicpc.net/group/workbook/view/24136/82659)
 * [1270 : 전쟁](https://www.acmicpc.net/problem/1270)
-* [13930 : 출근](https://www.acmicpc.net/problem/13903)
+* [13903 : 출근](https://www.acmicpc.net/problem/13903)
 * [7568 : 덩치](https://www.acmicpc.net/problem/7568)
 
 ### [DP](https://www.acmicpc.net/group/workbook/view/24136/83499)

@@ -1,6 +1,6 @@
 import java.util.*;
 
-class Solution {
+class Solution_72413 {
     
     static class Edge implements Comparable<Edge> {
         int to;

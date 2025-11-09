@@ -49,7 +49,7 @@ jobs:
               .map(commit => commit.commit.message.split('\n')[0])
               .filter(message => {
                 const trimmedMessage = message.trim();
-                return trimmedMessage.startsWith('[BOJ]') || trimmedMessage.startsWith('[SWEA]');
+                return trimmedMessage.startsWith('[BOJ]') || trimmedMessage.startsWith('[SWEA]') || trimmedMessage.startsWith('[PG]');
               });
             console.log(`3. 필터링 후 ${problemCommits.length}개의 문제 커밋을 찾았습니다:`, problemCommits);
 

@@ -15,5 +15,5 @@
 ## 중급반
 
 ### [구현](https://www.acmicpc.net/group/workbook/view/24136/85774)
-* [2169 : 로봇 조종하기](https://www.acmicpc.net/problem/1327)
-* [11049 : 행렬 곱셈 순서](https://www.acmicpc.net/problem/1419)
+* [1327 : 소트 게임](https://www.acmicpc.net/problem/1327)
+* [1419 : 등차수열의 합](https://www.acmicpc.net/problem/1419)

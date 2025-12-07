@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-public class BOJ_13023_상어초등학교 {
+public class BOJ_13023_ABCDE {
 	
 	
 	static int n, m;

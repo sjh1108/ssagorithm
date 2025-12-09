@@ -6,7 +6,9 @@
 * 가장 시간이 오래걸린 문제 4문제 선정하여 업로드
 
 ## 중급반 
-* 25048 : 랜선 연결
-https://www.acmicpc.net/problem/25048
-* 2263 : 트리의 순회
-https://www.acmicpc.net/problem/2263
+* 1301 : 비즈 공예
+https://www.acmicpc.net/problem/1301
+* 1918 : 후위 표기식
+https://www.acmicpc.net/problem/1918
+* 2696 : 중앙값 구하기
+https://www.acmicpc.net/problem/2696

@@ -1,3 +1,5 @@
+package week01_02.thdwngjs.BOJ_14950;
+
 import java.io.*;
 import java.util.*;
 class Main {

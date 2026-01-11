@@ -2,7 +2,7 @@ package week01_02.thdwngjs.BOJ_2643;
 
 import java.io.*;
 import java.util.*;
-class BOJ_2643 {
+class Main {
 
     static class Shape implements Comparable<Shape>{
         int x, y;

@@ -1,9 +1,7 @@
-package gold_3;
-
 import java.io.*;
 import java.util.*;
 
-public class Main_5021 {
+public class Main_5021_왕위_계승 {
 
     /*
      * BOJ_5021 : 왕위 계승(Gold_3)

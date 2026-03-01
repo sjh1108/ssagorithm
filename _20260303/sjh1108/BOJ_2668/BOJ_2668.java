@@ -20,6 +20,7 @@ class Main {
         list = new LinkedList<>();
 
         for (int i = 1; i <= N; i++) {
+            // i에서 시작하는 사이클 여부 확인
             visited[i] = true;
             num = i;
             dfs(i);
@@ -34,8 +35,10 @@ class Main {
     }
 
     public static void dfs(int i) {
+        // 시작 숫자로 되돌아오면 사이클 성립
         if (arr[i] == num) list.add(num);
         
+        // 다음 정점을 방문
         if (!visited[arr[i]]) {
             visited[arr[i]] = true;
             dfs(arr[i]);

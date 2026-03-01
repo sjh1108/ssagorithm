@@ -10,6 +10,7 @@ class Main {
     private static int N, B, K;
 
     private static int[][] map;
+    // 행별 B구간의 최대/최소를 미리 계산
     private static int[][] max, min;
     
     public static void main(String[] args) throws IOException {
@@ -32,6 +33,7 @@ class Main {
 		max = new int[N + 1][N + 1];
 		min = new int[N + 1][N + 1];
 
+        // 각 행에서 길이 B 구간의 최대/최소 전처리
 		for (int i = 1; i <= N; i++) {
 			for (int j = 1; j <= N - B + 1; j++) {
 				int maxV = MIN;
@@ -57,6 +59,7 @@ class Main {
 			int maxVal = MIN;
 			int minVal = MAX;
 
+            // BxB 영역에서 행 전처리 값을 이용해 최댓값/최솟값 계산
 			for (int i = 0; i < B; i++) {
 				maxVal = Math.max(maxVal, max[r + i][c]);
 				minVal = Math.min(minVal, min[r + i][c]);

@@ -2,7 +2,7 @@
 
 선정문제는 다음과 같습니다
 
-@골드반
+@실버반
 * 2161 : 카드
 https://www.acmicpc.net/problem/2161
 * 3088 : 화분 부수기
@@ -18,7 +18,7 @@ https://www.acmicpc.net/problem/24479
 * 31861 : 비밀번호 만들기
 https://www.acmicpc.net/problem/31861
 
-@실버반
+@골드반
 * 2250 : 트리의 높이와 너비
 https://www.acmicpc.net/problem/2250
 * 4716 : 풍선

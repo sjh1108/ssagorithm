@@ -19,6 +19,7 @@ class Main {
     private static int[] parent;
     private static int[] minCol;
     private static int[] maxCol;
+    // 중위 순회 시 노드에 부여할 현재 열 번호
     private static int col = 1;
 
     public static void main(String[] args) throws IOException {
@@ -40,6 +41,7 @@ class Main {
             if (right != -1) parent[right] = node;
         }
 
+        // 부모가 없는 노드가 루트
         int root = 1;
         for (int i = 1; i <= N; i++) {
             if (parent[i] == 0) {
@@ -52,6 +54,7 @@ class Main {
         maxCol = new int[N + 1];
         Arrays.fill(minCol, Integer.MAX_VALUE);
 
+        // 중위 순회 순서대로 열 번호를 배치한다.
         inorder(root, 1);
 
         int bestLevel = 1;
@@ -60,6 +63,7 @@ class Main {
         for (int level = 1; level <= N; level++) {
             if (minCol[level] == Integer.MAX_VALUE) continue;
             int width = maxCol[level] - minCol[level] + 1;
+            // 문제 조건상 너비가 같으면 더 작은 레벨 유지
             if (width > bestWidth) {
                 bestWidth = width;
                 bestLevel = level;
@@ -74,6 +78,7 @@ class Main {
 
         inorder(nodes[node].left, depth + 1);
 
+        // 현재 레벨의 최소/최대 열 번호 갱신
         minCol[depth] = Math.min(minCol[depth], col);
         maxCol[depth] = Math.max(maxCol[depth], col);
         col++;

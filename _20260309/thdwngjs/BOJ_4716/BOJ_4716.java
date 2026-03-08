@@ -15,6 +15,7 @@ class Main {
 
         @Override
         public int compareTo(Balloon o) {
+            // 두 창고 거리 차이가 큰 팀부터 처리해야 손해를 줄일 수 있다.
             return Integer.compare(Math.abs(o.a - o.b), Math.abs(this.a - this.b));
         }
     }
@@ -30,6 +31,7 @@ class Main {
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
 
+        // 0 0 0 이 나올 때까지 테스트 케이스 반복
         init();
         while (!(N == 0 && A == 0 && B == 0)) {
             input();
@@ -67,6 +69,7 @@ class Main {
         while (!pq.isEmpty()) {
             Balloon cur = pq.poll();
 
+            // 더 가까운 창고에서 우선 배정하고, 부족분은 반대 창고에서 채운다.
             if (cur.a <= cur.b) {
                 int fromA = Math.min(A, cur.k);
                 int fromB = cur.k - fromA;

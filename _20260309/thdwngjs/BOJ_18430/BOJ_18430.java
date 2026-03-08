@@ -8,6 +8,7 @@ class Main {
 
     private static int[][] map;
     private static boolean[][] visited;
+    // 중심 기준 (날개1, 날개2) 상대좌표 4가지
     private static final int[][] BOOMERANGS = {
         {1, 0, 0, -1},   // down + left
         {-1, 0, 0, -1},  // up + left
@@ -39,6 +40,7 @@ class Main {
     }
 
     private static void dfs(int idx, int sum) {
+        // 모든 칸을 확인했으면 최대 강도 갱신
         if (idx == N * M) {
             res = Math.max(res, sum);
             return;
@@ -48,6 +50,7 @@ class Main {
         int c = idx % M;
 
         if (!visited[r][c]) {
+            // 현재 칸을 중심으로 부메랑을 놓아 본다.
             visited[r][c] = true;
             for (int[] shape : BOOMERANGS) {
                 int arm1R = r + shape[0];
@@ -62,6 +65,7 @@ class Main {
                 visited[arm1R][arm1C] = true;
                 visited[arm2R][arm2C] = true;
 
+                // 중심 칸 가중치가 2배
                 int gain = map[r][c] * 2 + map[arm1R][arm1C] + map[arm2R][arm2C];
                 dfs(idx + 1, sum + gain);
 
@@ -71,6 +75,7 @@ class Main {
             visited[r][c] = false;
         }
 
+        // 현재 칸을 중심으로 사용하지 않는 경우
         dfs(idx + 1, sum);
     }
 

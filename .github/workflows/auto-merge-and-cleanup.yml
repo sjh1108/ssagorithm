@@ -3,7 +3,7 @@ name: Weekly Auto-Merge and Branch Cleanup
 on:
   schedule:
     # Every Friday at 22:00 KST (13:00 UTC)
-    - cron: "0 13 * * 5"
+    - cron: "0 13 * * 2"
   workflow_dispatch: {}
 
 permissions:

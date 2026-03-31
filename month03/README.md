@@ -1,35 +1,15 @@
-# 4월 1주차 ( 4 / 6 )
+# 2026년 3월 알고리즘 스터디
 
-선정문제는 다음과 같습니다
+## 개요
+- 기간: 2026-03-03 ~ 2026-03-30
+- 주차: 5주
+- 주차별 선정 문제: 14문제 (실버 7 / 골드 7)
 
-@실버반
-* 2529 : 부등호
-https://www.acmicpc.net/problem/2529
-* 15887 : 욱제는 결벽증이야!!
-https://www.acmicpc.net/problem/15887
-* 24444 : 알고리즘 수업 - 너비 우선 탐색 1
-https://www.acmicpc.net/problem/24444
-* 26070 : 곰곰이와 학식
-https://www.acmicpc.net/problem/26070
-* 28081 : 직사각형 피자
-https://www.acmicpc.net/problem/28081
-* 32386 : KCPC에 등장할 알고리즘 맞히기
-https://www.acmicpc.net/problem/32386
-* 32980 : 분리배출
-https://www.acmicpc.net/problem/32980
-
-@골드반
-* 1519 : 부분 문자열 뽑기 게임
-https://www.acmicpc.net/problem/1519
-* 3430 : 용이 산다
-https://www.acmicpc.net/problem/3430
-* 10476 : 좁은 미술전시관
-https://www.acmicpc.net/problem/10476
-* 13424 : 비밀 모임
-https://www.acmicpc.net/problem/13424
-* 14442 : 벽 부수고 이동하기 2
-https://www.acmicpc.net/problem/14442
-* 21278 : 호석이 두 마리 치킨
-https://www.acmicpc.net/problem/21278
-* 25427 : DKSH를 찾아라
-https://www.acmicpc.net/problem/25427
+## 주차별 링크
+| 주차 | 날짜 | 문제 목록 |
+|---|---|---|
+| 1주차 | 03/03 | [_20260303](./_20260303/README.md) |
+| 2주차 | 03/09 | [_20260309](./_20260309/README.md) |
+| 3주차 | 03/16 | [_20260316](./_20260316/README.md) |
+| 4주차 | 03/23 | [_20260323](./_20260323/README.md) |
+| 5주차 | 03/30 | [_20260330](./_20260330/README.md) |

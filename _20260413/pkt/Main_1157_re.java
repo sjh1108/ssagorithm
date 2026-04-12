@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 // 알고리즘 재활소 단어공부 브1
-public class Main_1157 {
+public class Main_1157_re {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String word = br.readLine().toUpperCase();

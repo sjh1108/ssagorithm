@@ -4,44 +4,48 @@ import java.io.*;
 import java.util.*;
 
 class Main {
+    private static int N, X;
+    private static int[] process_time;
+ 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-        int N = Integer.parseInt(br.readLine());
-
-        StringTokenizer st;
-
-        TreeMap<Integer, Integer> map = new TreeMap<>();
-        for(int i = 0; i < N; i++){
-            st = new StringTokenizer(br.readLine());
-
-            int e = Integer.parseInt(st.nextToken());
-            int x = Integer.parseInt(st.nextToken());
-
-            map.put(e, map.getOrDefault(e, 0) + 1);
-            map.put(x, map.getOrDefault(x, 0) - 1);
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        X = Integer.parseInt(st.nextToken());
+ 
+        st = new StringTokenizer(br.readLine());
+        process_time = new int[N + 1];
+        for(int i = 1; i <= N; i++) {
+            process_time[i] = Integer.parseInt(st.nextToken());
         }
-
-        int sum = 0;
-        int max = 0;
-        int start = 0, end = 0;
-        boolean flag = true;
-        while(!map.isEmpty()){
-            Map.Entry<Integer, Integer> entry = map.pollFirstEntry();
-            int time = entry.getKey();
-            sum += entry.getValue();
-
-            if(sum > max){
-                max = sum;
-                start = time;
-                flag = true;
-            } else if(sum < max && flag){
-                end = time;
-                flag = false;
+ 
+        int l = 1;
+        int r = N;
+        while(l <= r) {
+            int mid = (l + r) / 2;
+ 
+            if(can_process(mid)) {
+                r = mid - 1; 
+            } else {
+                l = mid + 1;
             }
         }
 
-        System.out.println(max);
-        System.out.println(start + " " + end);
+        System.out.println(l);
+    }
+ 
+    public static boolean can_process(int mid) {
+        PriorityQueue<Integer> q = new PriorityQueue<>();
+        
+        for(int i = 0; i < mid; i++) {
+            q.offer(0);
+        }
+ 
+        for(int i = 1; i <= N; i++) {
+            int time = q.poll();
+            if(time + process_time[i] > X) return false;
+            q.offer(time + process_time[i]);
+        }
+        return true;
     }
 }

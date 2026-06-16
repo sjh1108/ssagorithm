@@ -1,3 +1,4 @@
+package _20260526.yong;
 import java.util.Queue;
 import java.util.ArrayDeque;
 class Solution {

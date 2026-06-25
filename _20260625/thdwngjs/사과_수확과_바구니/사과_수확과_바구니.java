@@ -1,4 +1,4 @@
-package _20260625.thdwngjs.폴더_검사_순서;
+package _20260625.thdwngjs.사과_수확과_바구니;
 
 import java.io.*;
 import java.util.*;

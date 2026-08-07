@@ -7,6 +7,7 @@
 - 코드 리뷰를 통한 코드 분석 역량 향상
 
 ## 운영 계획
+
 ### 기본 목표
 - 주 4문제 풀이
 - Git 사용에 익숙해지기
@@ -25,61 +26,90 @@
 ### 불참 안내
 - 건강 이상, 면접/코테 참여 등 불참 이슈가 있으면 사전 연락
 
-## Git 사용 방법
-1. 저장소 클론
-```bash
-git clone <repository-url>
+## 디렉터리 구조
+
+`month{월}/_{주차 시작일}/{GitHub 아이디}/{문제}/` 순서로 폴더를 만들고, 그 안에 풀이 코드를 둡니다.
+문제별로 `README.md`를 함께 두면 상세 풀이를 정리할 수 있습니다.
+
+```text
+ssagorithm/
+├── month07/
+│   └── _20260727/                        # 해당 주차의 시작 날짜 (YYYYMMDD)
+│       ├── hmSON/                        # 개인 폴더 (GitHub 아이디)
+│       │   ├── OJ_24. 카드 합의 K번째 수/
+│       │   │   └── Main_24_카드_합의_K번째_수.java
+│       │   └── OJ_25. 두 상자의 카드 합의 K번째 수/
+│       │       ├── Main_25_두_상자의_카드_합의_K번째_수.java
+│       │       └── README.md             # 문제별 상세 풀이 (선택)
+│       └── kimhoein/
+│           └── 42583_다리를_지나는_트럭/
+│               └── Solution.java
+├── month08/
+│   └── ...
+└── 2024/                                 # 2024년 스터디 기록 (아카이브)
+    └── month09/
+        └── week09_01/
 ```
 
-2. 최신 변경사항 반영
-```bash
-git pull
+- 개인 폴더 이름은 GitHub 아이디로 통일합니다.
+- 문제 폴더 이름은 파일명만 보고도 어떤 문제인지 알 수 있게 작성합니다. (예: `BOJ_1000`, `42583_다리를_지나는_트럭`, `OJ_30. 최소 요금 항로`)
+- `2024/` 폴더는 이전 시즌 기록이라 구조가 다릅니다. 새 풀이는 `monthNN/` 아래에 올려 주세요.
+
+## 작성 규칙
+
+### 브랜치
+```text
+feature/week_MM_WW_아이디
 ```
+- `MM`은 월, `WW`는 그 달의 몇 번째 주차인지, 아이디는 GitHub 아이디입니다.
+- 예시: `feature/week_08_01_kimhoein` (8월 1주차, kimhoein)
 
-3. 현재 브랜치 확인
-```bash
-git branch
-```
+### 커밋
+- 문제 단위로 커밋합니다.
+- 커밋 메시지 형식: `[태그] 문제번호_문제이름 / 난이도 / 이름`
 
-4. 작업 브랜치 생성
-```bash
-git branch feature/weekMM_WW_name
-```
-- 브랜치명은 팀원이 식별 가능하게 작성해 주세요.
-
-5. 작업 브랜치로 이동
-```bash
-git checkout feature/weekMM_WW_name
-```
-
-6. 문제 풀이 반영
-- 풀이 파일은 개인 폴더에 모아 관리
-- 문제 단위로 커밋
-- 파일명만 보고도 어떤 문제인지 알 수 있게 작성
-
-7. 커밋
-- VS Code/IntelliJ 등의 GUI 커밋 사용 가능
-- 커밋 메시지 앞에 `[BOJ]`, `[SWEA]`를 붙이면 PR에 문제 리스트가 자동 업로드됨
-
-예시:
 ```text
 [BOJ] 1000_A+B / 브론즈 5 / 송주헌
 ```
 
-8. 푸시
-- 아래와 같은 upstream 오류가 나면:
-```bash
-fatal: The current branch feature/webhook has no upstream branch.
-```
-- 다음 명령어로 해결:
-```bash
-git push --set-upstream origin <브랜치명>
-```
+- 아래 태그로 시작하는 커밋은 PR 본문의 문제 목록에 자동으로 수집됩니다.
 
-9. Pull Request 생성
-- GitHub 저장소에서 `Compare & pull request`로 PR 생성
-- PR 템플릿에 맞춰 작성
+| 태그 | 출처 |
+| --- | --- |
+| `[BOJ]` | 백준 |
+| `[SWEA]` | SW Expert Academy |
+| `[PG]` | 프로그래머스 |
+| `[OJ]` | 자체 온라인 저지 |
+| `[KOI]` | 한국정보올림피아드 |
+
+### Pull Request
 - PR 제목 형식:
 ```text
-[Week] 이름 - N문제 풀이
+[8월 1주차] 이름 - N문제 풀이
 ```
+- 본문은 PR 템플릿에 맞춰 작성합니다.
+
+## 자동화 워크플로
+
+`.github/workflows`에 세 가지 GitHub Actions가 설정되어 있습니다.
+
+### 1. PR 문제 목록 자동 작성 (`pr-automation.yml`)
+- 실행 시점: PR이 열리거나, 재오픈되거나, 새 커밋이 푸시될 때
+- 하는 일: PR에 포함된 커밋 중 문제 태그(`[BOJ]`, `[SWEA]`, `[PG]`, `[OJ]`, `[KOI]`)로 시작하는 커밋을 모아 PR 본문의 **이번 주에 푼 문제** 항목을 채웁니다.
+- 주의: PR 템플릿의 아래 주석은 삽입 위치 표시이므로 지우지 마세요. 지우면 목록이 채워지지 않습니다.
+
+```text
+<!-- AUTO_GENERATED_PROBLEM_LIST_START -->
+<!-- AUTO_GENERATED_PROBLEM_LIST_END -->
+```
+
+### 2. 디스코드 알림 (`discord-notify.yml`)
+- 실행 시점: PR이 열리거나 재오픈될 때
+- 하는 일: PR 제목과 작성자를 스터디 디스코드 채널로 전송합니다.
+- 저장소 시크릿 `DISCORD_WEBHOOK_URL`을 사용합니다.
+
+### 3. 주간 자동 머지 및 브랜치 정리 (`auto-merge-and-cleanup.yml`)
+- 실행 시점: 매주 **수요일 오전 0시(KST)**. 필요하면 Actions 탭에서 수동 실행도 가능합니다.
+- 하는 일: 열려 있는 PR을 모두 머지하고, 머지된 브랜치를 삭제합니다.
+- Draft 상태의 PR은 건너뜁니다. 아직 머지되면 안 되는 작업은 **Draft로 올려 두세요.**
+- 마감이 수요일 0시이므로, 리뷰는 화요일까지 마무리하는 것이 좋습니다.

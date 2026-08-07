@@ -6,6 +6,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+# 같은 PR에 대한 실행은 항상 1개만 유지합니다.
+# 연속 푸시로 여러 런이 겹치면 오래된 런을 취소해, 가장 마지막 상태가 본문에 남도록 합니다.
+concurrency:
+  group: pr-problem-list-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 # 실행될 작업(Job) 목록
 jobs:
   update-pr-body:
@@ -25,66 +31,88 @@ jobs:
 
             const { repo, owner } = context.repo;
             const prNumber = context.payload.pull_request.number;
-            const prBody = context.payload.pull_request.body || '';
 
-            console.log('1. 현재 PR 본문 (prBody):');
-            console.log('------------------------------------');
-            console.log(prBody);
-            console.log('------------------------------------');
-
-            // 시작과 끝을 나타내는 새로운 마커(marker)를 정의합니다.
+            // 시작과 끝을 나타내는 마커(marker)를 정의합니다.
             const startMarker = '<!-- AUTO_GENERATED_PROBLEM_LIST_START -->';
             const endMarker = '<!-- AUTO_GENERATED_PROBLEM_LIST_END -->';
 
-            // 1. 현재 PR에 포함된 모든 커밋 목록을 가져옵니다.
-            const { data: commits } = await github.rest.pulls.listCommits({
+            // 정규식에서 특수문자로 해석될 수 있는 문자를 이스케이프합니다.
+            const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+            // 1. PR에 포함된 모든 커밋을 가져옵니다.
+            //    페이지네이션을 적용해 커밋이 30개를 넘어도 누락되지 않도록 합니다.
+            const commits = await github.paginate(github.rest.pulls.listCommits, {
               owner,
               repo,
               pull_number: prNumber,
+              per_page: 100,
             });
-            console.log(`2. PR에서 ${commits.length}개의 커밋을 찾았습니다.`);
+            console.log(`1. PR에서 ${commits.length}개의 커밋을 찾았습니다.`);
 
             // 2. 커밋 메시지에서 문제 정보를 필터링하고 목록으로 만듭니다.
+            const problemTags = ['[BOJ]', '[SWEA]', '[PG]', '[OJ]', '[KOI]'];
             const problemCommits = commits
-              .map(commit => commit.commit.message.split('\n')[0])
-              .filter(message => {
-                const trimmedMessage = message.trim();
-                return trimmedMessage.startsWith('[BOJ]') || trimmedMessage.startsWith('[SWEA]') || trimmedMessage.startsWith('[PG]') || trimmedMessage.startsWith('[OJ]') || trimmedMessage.startsWith('[KOI]');
-              });
-            console.log(`3. 필터링 후 ${problemCommits.length}개의 문제 커밋을 찾았습니다:`, problemCommits);
+              .map(commit => commit.commit.message.split('\n')[0].trim())
+              .filter(message => problemTags.some(tag => message.startsWith(tag)));
+            console.log(`2. 필터링 후 ${problemCommits.length}개의 문제 커밋을 찾았습니다:`, problemCommits);
+
+            // 같은 문제를 여러 번 커밋한 경우 목록에 중복으로 쌓이지 않도록 정리합니다.
+            const uniqueProblems = [...new Set(problemCommits)];
+            if (uniqueProblems.length !== problemCommits.length) {
+              console.log(`   중복 커밋 메시지 ${problemCommits.length - uniqueProblems.length}건을 제외했습니다.`);
+            }
 
             let problemListMarkdown = '✅ 이번 주에 푼 문제가 없습니다.';
-            if (problemCommits.length > 0) {
-              problemListMarkdown = problemCommits
-                .map(message => `- ${message.trim()}`)
-                .join('\n');
+            if (uniqueProblems.length > 0) {
+              problemListMarkdown = uniqueProblems.map(message => `- ${message}`).join('\n');
             }
-            console.log('4. 생성된 문제 목록 마크다운 (problemListMarkdown):');
+            console.log('3. 생성된 문제 목록 마크다운 (problemListMarkdown):');
             console.log('------------------------------------');
             console.log(problemListMarkdown);
             console.log('------------------------------------');
 
-            // 3. 시작과 끝 마커 사이에 최신 문제 목록을 포함하는 새로운 블록을 생성합니다.
+            // 3. PR 본문을 API로 새로 조회합니다.
+            //    웹훅 페이로드의 본문은 이벤트 발생 시점의 스냅샷이라,
+            //    실행 도중 누군가 본문을 수정하면 그 수정을 덮어쓰게 됩니다.
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+            const prBody = pullRequest.body || '';
+            console.log('4. 현재 PR 본문 (prBody):');
+            console.log('------------------------------------');
+            console.log(prBody);
+            console.log('------------------------------------');
+
+            // 4. 마커 블록을 최신 문제 목록으로 교체합니다.
             const newBlock = `${startMarker}\n${problemListMarkdown}\n${endMarker}`;
-            
-            // 4. PR 본문에서 기존 블록을 찾아서 새로운 블록으로 교체합니다.
-            const regex = new RegExp(`${startMarker}[\\s\\S]*?${endMarker}`, 'm');
-            
+
+            // g 플래그로 모든 마커 블록을 찾습니다.
+            // 본문에 블록이 여러 개 생긴 경우 첫 번째만 목록으로 채우고 나머지는 제거해,
+            // 같은 목록이 두 벌로 표시되지 않도록 합니다.
+            const blockRegex = new RegExp(`${escapeRegExp(startMarker)}[\\s\\S]*?${escapeRegExp(endMarker)}`, 'g');
+            const blockCount = (prBody.match(blockRegex) || []).length;
+
             let newBody;
-            // 기존 블록이 있다면 교체하고, 없다면 이전 placeholder를 찾아서 교체합니다.
-            if (regex.test(prBody)) {
-                console.log('5. PR 본문에서 시작/끝 마커를 찾았습니다. 내용을 교체합니다.');
-                newBody = prBody.replace(regex, newBlock);
+            if (blockCount > 0) {
+              console.log(`5. PR 본문에서 마커 블록 ${blockCount}개를 찾았습니다. 내용을 교체합니다.`);
+              if (blockCount > 1) {
+                console.log(`   중복된 블록 ${blockCount - 1}개를 제거합니다.`);
+              }
+              let replaced = 0;
+              // 교체 문자열의 "$" 특수 패턴이 해석되지 않도록 함수 형태로 넘깁니다.
+              newBody = prBody.replace(blockRegex, () => (replaced++ === 0 ? newBlock : ''));
             } else {
-                console.log('5. PR 본문에서 시작/끝 마커를 찾지 못했습니다.');
-                const oldPlaceholder = '<!-- AUTO_GENERATED_PROBLEM_LIST -->';
-                if (prBody.includes(oldPlaceholder)) {
-                    console.log('   대신 이전 버전의 placeholder를 찾았습니다. 내용을 교체합니다.');
-                    newBody = prBody.replace(oldPlaceholder, newBlock);
-                } else {
-                    console.log('   이전 버전의 placeholder도 찾지 못해 본문을 수정하지 않습니다.');
-                    newBody = prBody; // 아무것도 찾지 못하면 원본을 그대로 둡니다.
-                }
+              console.log('5. PR 본문에서 시작/끝 마커를 찾지 못했습니다.');
+              const oldPlaceholder = '<!-- AUTO_GENERATED_PROBLEM_LIST -->';
+              if (prBody.includes(oldPlaceholder)) {
+                console.log('   대신 이전 버전의 placeholder를 찾았습니다. 내용을 교체합니다.');
+                newBody = prBody.split(oldPlaceholder).join(newBlock);
+              } else {
+                console.log('   이전 버전의 placeholder도 찾지 못해 본문을 수정하지 않습니다.');
+                newBody = prBody; // 아무것도 찾지 못하면 원본을 그대로 둡니다.
+              }
             }
 
             console.log('6. 최종적으로 업데이트될 PR 본문 (newBody):');
@@ -93,18 +121,17 @@ jobs:
             console.log('------------------------------------');
 
             // 5. 변경된 내용으로 PR 본문을 업데이트합니다.
-            // 본문에 변경이 있을 때만 API를 호출하도록 수정
+            //    본문에 변경이 있을 때만 API를 호출합니다.
             if (newBody !== prBody) {
-                await github.rest.pulls.update({
-                  owner,
-                  repo,
-                  pull_number: prNumber,
-                  body: newBody,
-                });
-                console.log('7. PR 본문 업데이트를 성공적으로 요청했습니다.');
+              await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: prNumber,
+                body: newBody,
+              });
+              console.log('7. PR 본문 업데이트를 성공적으로 요청했습니다.');
             } else {
-                console.log('7. PR 본문에 변경사항이 없어 업데이트를 요청하지 않았습니다.');
+              console.log('7. PR 본문에 변경사항이 없어 업데이트를 요청하지 않았습니다.');
             }
             console.log('======== 스크립트 실행 종료 ========');
             // ------------------ 스크립트 끝 ------------------
-

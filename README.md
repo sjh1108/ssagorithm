@@ -106,8 +106,6 @@ git checkout feature/week_08_01_kimhoein
 | `[OJ]` | 자체 온라인 저지 |
 | `[KOI]` | 한국정보올림피아드 |
 
-- 문제 풀이가 아닌 커밋은 `[DOCS]`, `[REFACTOR]` 등을 사용합니다. 이 커밋들은 문제 목록에 포함되지 않습니다.
-
 8. 푸시
 - 아래와 같은 upstream 오류가 나면:
 ```bash

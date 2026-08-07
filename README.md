@@ -55,41 +55,17 @@ ssagorithm/
 - 문제 폴더 이름은 파일명만 보고도 어떤 문제인지 알 수 있게 작성합니다. (예: `BOJ_1000`, `42583_다리를_지나는_트럭`, `OJ_30. 최소 요금 항로`)
 - `2024/` 폴더는 이전 시즌 기록이라 구조가 다릅니다. 새 풀이는 `monthNN/` 아래에 올려 주세요.
 
-## Git 사용 방법
+## 작성 규칙
 
-1. 저장소 클론
-```bash
-git clone <repository-url>
-```
-
-2. 최신 변경사항 반영
-```bash
-git pull
-```
-
-3. 현재 브랜치 확인
-```bash
-git branch
-```
-
-4. 작업 브랜치 생성
-```bash
-git branch feature/week_MM_WW_아이디
+### 브랜치
+```text
+feature/week_MM_WW_아이디
 ```
 - `MM`은 월, `WW`는 그 달의 몇 번째 주차인지, 아이디는 GitHub 아이디입니다.
 - 예시: `feature/week_08_01_kimhoein` (8월 1주차, kimhoein)
 
-5. 작업 브랜치로 이동
-```bash
-git checkout feature/week_08_01_kimhoein
-```
-
-6. 문제 풀이 반영
-- 풀이 파일은 위 [디렉터리 구조](#디렉터리-구조)에 맞춰 개인 폴더에 모아 관리
-- 문제 단위로 커밋
-
-7. 커밋
-- VS Code/IntelliJ 등의 GUI 커밋 사용 가능
+### 커밋
+- 문제 단위로 커밋합니다.
 - 커밋 메시지 형식: `[태그] 문제번호_문제이름 / 난이도 / 이름`
 
 ```text
@@ -106,23 +82,12 @@ git checkout feature/week_08_01_kimhoein
 | `[OJ]` | 자체 온라인 저지 |
 | `[KOI]` | 한국정보올림피아드 |
 
-8. 푸시
-- 아래와 같은 upstream 오류가 나면:
-```bash
-fatal: The current branch feature/webhook has no upstream branch.
-```
-- 다음 명령어로 해결:
-```bash
-git push --set-upstream origin <브랜치명>
-```
-
-9. Pull Request 생성
-- GitHub 저장소에서 `Compare & pull request`로 PR 생성
-- PR 템플릿에 맞춰 작성
+### Pull Request
 - PR 제목 형식:
 ```text
 [8월 1주차] 이름 - N문제 풀이
 ```
+- 본문은 PR 템플릿에 맞춰 작성합니다.
 
 ## 자동화 워크플로
 

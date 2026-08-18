@@ -1,190 +1,52 @@
----
-title: 고대 화폐의 금액
-difficulty: SILVER
-tags: 다이나믹 프로그래밍, 배낭 문제, 구현
-timeLimit: 3
-memoryLimit: 256
-isPublic: true
----
-<!-- @description -->
-유적에서 고대 화폐의 거푸집 $M$개가 발굴됐다. $i$번째 거푸집으로는 액면가가 $v_i$인 동전을 찍어낼 수 있다. 거푸집은 몇 번이든 다시 쓸 수 있으므로, 각 종류의 동전을 **원하는 만큼 얼마든지** 쓸 수 있다.
+# 고대 화폐의 금액 해설
 
-동전 몇 개를 골라 액면가를 모두 더한 값을 그 조합의 **금액**이라고 한다. 동전을 하나도 고르지 않은 경우는 세지 않는다.
+## 문제 요약
 
-$1$ 이상 $S$ 이하의 정수 중에서 만들 수 있는 금액이 몇 가지인지, 그리고 그 금액들을 모두 더하면 얼마인지 구한다. 같은 금액을 여러 방법으로 만들 수 있어도 한 번만 센다.
+액면가 $M$가지를 개수 제한 없이 써서 만들 수 있는 $1$ 이상 $S$ 이하의 금액이 몇 가지인지, 그 합은 얼마인지 구한다.
 
-액면가가 $S$보다 큰 거푸집도 주어질 수 있다. 그런 동전은 한 개만 써도 금액이 $S$를 넘으므로 아무 도움이 되지 않는다.
+## 관찰
 
-금액들의 총합은 $50$억을 넘을 수 있어 32비트 정수 범위를 벗어난다.
+동전을 몇 개 쓸지 전부 시도하면 경우의 수가 폭발한다. 하지만 우리가 알아야 할 것은 "어떤 조합으로 만들었는가"가 아니라 **"이 금액을 만들 수 있는가"** 뿐이다. 만드는 방법이 열 가지든 한 가지든 답에는 똑같이 한 번만 기여한다.
 
-#### 예시
+그래서 상태를 금액 하나로 잡을 수 있다. $dp[x]$를 "금액 $x$를 만들 수 있으면 참"으로 두면
 
-$M = 2$, $S = 12$이고 액면가가 $2$, $5$라고 하자.
+$$dp[x] = \bigvee_{i} dp[x - v_i]$$
 
-- $1$은 만들 수 없다. $2$는 $2$ 하나로 만든다. $3$은 만들 수 없다.
-- $4 = 2+2$, $5 = 5$, $6 = 2+2+2$, $7 = 2+5$, $8 = 2+2+2+2$, $9 = 2+2+5$, $10 = 5+5$, $11 = 2+2+2+5$, $12 = 2+5+5$.
+이고, $dp[0]$은 참(아무것도 고르지 않은 상태)에서 시작한다.
 
-만들 수 있는 금액은 $2, 4, 5, 6, 7, 8, 9, 10, 11, 12$의 $10$가지이고, 이들의 합은 $74$이다.
-<!-- @input -->
-첫째 줄에 거푸집의 수 $M$과 금액의 상한 $S$가 공백으로 구분되어 주어진다. ($1 \le M \le 100$, $1 \le S \le 100{,}000$)
+여기서 순서가 중요하다. 동전 하나를 고정하고 $x$를 **작은 쪽부터** 훑으면, $dp[x-v]$를 볼 때 그 값은 이미 "이 동전을 여러 번 쓴 결과"까지 반영된 상태다. 즉 정방향 순회가 곧 "무제한 사용"을 뜻한다.
 
-둘째 줄에 액면가 $v_1, v_2, \dots, v_M$이 공백으로 구분되어 주어진다. ($1 \le v_i \le 10^9$) 액면가가 같은 거푸집이 여러 개 있을 수 있다.
-<!-- @output -->
-첫째 줄에 만들 수 있는 금액의 가짓수와 그 금액들의 총합을 공백으로 구분해 출력한다. 만들 수 있는 금액이 하나도 없으면 `0 0`을 출력한다.
-<!-- @testcases -->
-~~~input sample
-2 12
-2 5
-~~~
-~~~output
-10 74
-~~~
-~~~input
-1 1
-1
-~~~
-~~~output
-1 1
-~~~
-~~~input
-2 10
-100 1000000000
-~~~
-~~~output
-0 0
-~~~
-~~~input
-3 20
-7 7 7
-~~~
-~~~output
-2 21
-~~~
-~~~input
-1 100000
-1
-~~~
-~~~output
-100000 5000050000
-~~~
-~~~input
-2 30
-3 5
-~~~
-~~~output
-26 451
-~~~
-<!-- @generator -->
-~~~generator python3
-import sys, random
+## 풀이
 
-def main():
-    data = sys.stdin.read().split()
-    seed = int(data[0]); m = int(data[1]); s = int(data[2])
-    mode = data[3] if len(data) > 3 else "rand"
-    rnd = random.Random()
-    rnd.seed(seed)
-    LIM = 10 ** 9
-    vals = []
-    if mode == "small":
-        for _ in range(m):
-            vals.append(rnd.randint(1, 30))
-    elif mode == "big":
-        for _ in range(m):
-            if rnd.random() < 0.4:
-                vals.append(rnd.randint(s + 1, LIM))
-            else:
-                vals.append(rnd.randint(s // 2, s))
-    elif mode == "prime":
-        base = [9973, 9967, 9949, 9941, 9931, 9929, 9923, 9907, 9901, 9887,
-                99991, 99989, 99971, 99961, 99923, 99991, 49999, 49993, 49991, 33331]
-        for _ in range(m):
-            vals.append(rnd.choice(base))
-    elif mode == "dup":
-        v = rnd.randint(2, 7)
-        vals = [v] * m
-    elif mode == "sparse":
-        for _ in range(m):
-            vals.append(rnd.randint(s // 3, s))
-    else:
-        for _ in range(m):
-            vals.append(rnd.randint(1, s))
-    out = ["%d %d" % (m, s), " ".join(map(str, vals))]
-    sys.stdout.write("\n".join(out) + "\n")
-
-main()
-~~~
-~~~solution python3
-import sys
-
-def main():
-    data = sys.stdin.buffer.read().split()
-    m = int(data[0]); s = int(data[1])
-    coins = [int(x) for x in data[2:2 + m]]
-    full = (1 << (s + 1)) - 1
-    mask = 1
-    for v in coins:
-        if v > s:
-            continue
-        step = v
-        while step <= s:
-            mask |= (mask << step) & full
-            step <<= 1
-    bits = bin(mask)[2:]
-    ln = len(bits)
-    cnt = 0
-    tot = 0
-    for i, ch in enumerate(bits):
-        if ch == "1":
-            amt = ln - 1 - i
-            if amt >= 1:
-                cnt += 1
-                tot += amt
-    sys.stdout.write("%d %d\n" % (cnt, tot))
-
-main()
-~~~
-~~~validator cpp
-// 독립 구현: 큰 정수 비트 시프트 대신 고전적인 bool 배열 DP 를 정방향으로 채운다.
-#include <bits/stdc++.h>
-using namespace std;
-int main() {
-    int m; long long s;
-    if (scanf("%d %lld", &m, &s) != 2) return 0;
-    vector<long long> v(m);
-    for (int i = 0; i < m; i++) scanf("%lld", &v[i]);
-    vector<char> dp(s + 1, 0);
-    dp[0] = 1;
-    for (int i = 0; i < m; i++) {
-        if (v[i] > s) continue;
-        long long c = v[i];
-        for (long long x = c; x <= s; x++)
-            if (dp[x - c]) dp[x] = 1;
-    }
-    long long cnt = 0, tot = 0;
-    for (long long x = 1; x <= s; x++) if (dp[x]) { cnt++; tot += x; }
-    printf("%lld %lld\n", cnt, tot);
-    return 0;
+```java
+dp[0] = true;
+for (int i = 0; i < m; i++) {
+    if (v[i] > s) continue;      // 한 개만 써도 S 를 넘는 동전은 버린다
+    for (int x = v[i]; x <= s; x++)
+        if (dp[x - v[i]]) dp[x] = true;
 }
-~~~
-~~~case
-301 100 100000 rand
-~~~
-~~~case
-307 100 100000 small
-~~~
-~~~case
-311 100 100000 big
-~~~
-~~~case
-317 100 100000 prime
-~~~
-~~~case
-323 60 99991 dup
-~~~
-~~~case
-331 100 100000 sparse
-~~~
-~~~case
-337 1 100000 rand
-~~~
+```
+
+다 채운 뒤 $x = 1 \dots S$를 훑으며 참인 것의 개수와 합을 센다.
+
+공개 샘플($v = 2, 5$, $S = 12$)을 보자. 동전 $2$를 처리하면 $dp$의 짝수 자리가 모두 켜진다($2,4,6,8,10,12$). 이어서 동전 $5$를 처리하면 $5$(=$dp[0]$에서), $7$(=$dp[2]$에서), $9, 11$이 켜지고, $10 = 5+5$은 $dp[5]$가 이미 켜져 있으므로 자동으로 얻어진다. 이게 정방향 순회가 무제한 사용을 만들어 내는 장면이다. 최종적으로 $2,4,5,6,7,8,9,10,11,12$의 $10$가지, 합 $74$.
+
+전체 자바 코드는 `java/B3-Solution.java` 참고.
+
+## 복잡도
+
+- 시간: 동전마다 $S$번 훑으므로 $O(M \cdot S)$. $100 \times 100{,}000 = 10^7$이라 여유가 있다.
+- 공간: $O(S)$ boolean 배열.
+
+## 구현 노트
+
+- 액면가가 $10^9$까지 올 수 있다. $S$보다 큰 값은 배열 인덱스로 쓸 수 없으니 반드시 먼저 걸러낸다. 이 처리를 빼면 배열 범위를 벗어난다.
+- 금액의 합은 최대 $\frac{10^5 \cdot (10^5+1)}{2} = 5{,}000{,}050{,}000$이다. `int`로 받으면 넘친다. 개수는 `int`로 충분하지만 합은 `long`이어야 한다.
+- 검증기는 파이썬 큰 정수 비트 시프트가 아니라 이 boolean DP를 그대로 쓰는 C++ 구현이다. 두 방식은 언어도 표현도 다르지만 같은 집합을 만들어야 한다.
+
+## 흔한 실수
+
+- 합을 `int`로 계산해 오버플로. 동전 $1$짜리 하나에 $S = 100{,}000$만 줘도 바로 터진다.
+- 액면가가 $S$보다 큰 경우를 거르지 않아 인덱스 예외.
+- $dp[0]$을 답에 포함시키기. 아무것도 고르지 않는 경우는 세지 않는다.
+- 순회 방향을 거꾸로(큰 금액부터) 잡기. 그러면 각 동전을 한 번씩만 쓴 결과가 나온다 — 이건 이 세트의 다음 문제 답이다.

@@ -1,419 +1,57 @@
----
-title: 공통 상위 기지
-difficulty: GOLD
-tags: 트리, 최소 공통 조상, 희소 배열, 그래프 탐색
-timeLimit: 6
-memoryLimit: 512
-isPublic: true
----
-<!-- @description -->
-남극 빙하 아래에 조사 기지 $N$개가 있다. 기지에는 $1$번부터 $N$번까지 번호가 붙어 있고, 얼음 터널 $N-1$개가 기지들을 잇는다. 터널만 이용해 어떤 기지에서 다른 어떤 기지로도 갈 수 있다. $1$번 기지가 본부다.
+# 공통 상위 기지 해설
 
-기지 $v$에서 본부까지 가는 경로는 하나뿐이다. 이 경로 위에 있는 기지(자기 자신 $v$도 포함한다)를 $v$의 **상위 기지**라고 하자. 기지 $u$와 기지 $v$의 상위 기지에 모두 속하는 기지 중에서 본부로부터 가장 멀리 떨어진 기지를 $u$와 $v$의 **공통 상위 기지**라고 한다.
+## 문제 요약
 
-두 기지의 상위 기지 목록에는 항상 본부가 들어 있으므로 공통 상위 기지는 반드시 존재하고, 유일하다.
+$1$번을 뿌리로 하는 트리에서 두 정점의 최소 공통 조상(LCA)을 질의마다 구한다.
 
-질의 $Q$개가 주어진다. 각 질의마다 두 기지의 공통 상위 기지를 구한다.
+## 관찰
 
-#### 예시
+정의를 그대로 옮기면 이렇다. 깊이가 더 깊은 쪽을 얕은 쪽과 같은 깊이까지 끌어올린 다음, 둘이 만날 때까지 함께 한 칸씩 올라간다. 맞는 답이지만 한 질의에 최대 $O(N)$이라 사슬 모양 트리에 질의 $10^5$개면 $10^{10}$번이다.
 
-기지가 $8$개이고 터널이 다음과 같다고 하자.
+여기서 낭비가 어디인지 보자. 한 칸씩 올라가는 과정은 결국 "$v$의 $k$번째 조상"을 반복해 묻는 것이다. $k$번째 조상을 빠르게 답할 수 있으면 두 단계 모두 빨라진다.
 
-```
-1 - 2 - 4
-|   |
-|   +- 5
-|
-+- 3 - 6 - 7
-        |
-        +- 8
-```
+핵심 관찰은 **$k$를 이진법으로 쪼갤 수 있다**는 것이다. $up[j][v]$를 "$v$의 $2^j$번째 조상"이라 정의하면
 
-- $u = 4$, $v = 5$: $4$의 상위 기지는 $\{4, 2, 1\}$, $5$의 상위 기지는 $\{5, 2, 1\}$이다. 공통은 $\{2, 1\}$이고 이 중 본부에서 더 먼 것은 $2$이다.
-- $u = 4$, $v = 7$: 공통은 $\{1\}$뿐이므로 답은 $1$이다.
-- $u = 7$, $v = 8$: 공통은 $\{6, 3, 1\}$이고 답은 $6$이다.
-- $u = 6$, $v = 6$: 자기 자신도 상위 기지에 포함되므로 답은 $6$이다.
-- $u = 5$, $v = 2$: $2$가 $5$의 상위 기지이므로 답은 $2$이다.
-<!-- @input -->
-첫째 줄에 기지의 수 $N$과 질의의 수 $Q$가 공백으로 구분되어 주어진다. ($2 \le N \le 100{,}000$, $1 \le Q \le 100{,}000$)
+$$up[j][v] = up[j-1][\,up[j-1][v]\,]$$
 
-다음 $N-1$개의 줄에 터널이 잇는 두 기지의 번호 $a$, $b$가 주어진다. ($1 \le a, b \le N$, $a \ne b$) 같은 터널이 두 번 주어지지는 않으며, 주어진 터널로 모든 기지가 연결된다.
+로 $O(N \log N)$에 전부 채울 수 있다. $k = 13 = 8+4+1$처럼 켜진 비트만 따라 점프하면 $k$번째 조상을 $O(\log N)$에 구한다.
 
-다음 $Q$개의 줄에 질의 $u$, $v$가 주어진다. ($1 \le u, v \le N$) $u$와 $v$가 같을 수도 있고, 한쪽이 다른 쪽의 상위 기지일 수도 있다.
+두 번째 단계도 같은 표로 해결된다. $u$와 $v$가 같은 깊이일 때 큰 $j$부터 내려오며 `up[j][u] != up[j][v]`인 동안 둘을 함께 올린다. 이 조건은 "아직 LCA 아래에 있다"는 뜻이므로, 다 끝나면 $u$와 $v$는 LCA 바로 아래 자식이 되고 답은 $up[0][u]$다.
 
-터널이 주어지는 순서, 그리고 한 줄에서 두 기지가 적히는 순서는 정해져 있지 않다. 트리가 한 줄로 길게 이어진 모양이어서 깊이가 $100{,}000$에 이를 수도 있다.
-<!-- @output -->
-각 질의마다 한 줄씩, 두 기지의 공통 상위 기지의 번호를 출력한다. 질의가 주어진 순서대로 출력한다.
-<!-- @testcases -->
-~~~input sample
-8 5
-1 2
-1 3
-2 4
-2 5
-3 6
-6 7
-6 8
-4 5
-4 7
-7 8
-6 6
-5 2
-~~~
-~~~output
-2
-1
-6
-6
-2
-~~~
-~~~input
-2 3
-2 1
-1 2
-2 2
-1 1
-~~~
-~~~output
-1
-2
-1
-~~~
-~~~input
-10 6
-10 1
-9 10
-8 9
-7 8
-6 7
-5 6
-4 5
-3 4
-2 3
-2 10
-2 1
-5 2
-1 1
-7 3
-2 2
-~~~
-~~~output
-10
-1
-5
-1
-7
-2
-~~~
-~~~input
-7 5
-1 2
-1 3
-1 4
-1 5
-1 6
-1 7
-2 3
-4 4
-1 6
-7 2
-5 1
-~~~
-~~~output
-1
-4
-1
-1
-1
-~~~
-~~~input
-9 6
-1 2
-2 3
-3 4
-1 5
-5 6
-6 7
-7 8
-8 9
-4 9
-4 2
-9 5
-3 3
-6 4
-2 9
-~~~
-~~~output
-1
-2
-5
-3
-1
-1
-~~~
-~~~input
-6 5
-3 1
-2 3
-4 2
-5 4
-6 5
-6 1
-6 3
-4 5
-5 4
-6 6
-~~~
-~~~output
-1
-3
-4
-4
-6
-~~~
-<!-- @generator -->
-~~~generator python3
-import sys, random
+## 풀이
 
-def build_par(n, typ, rnd):
-    par = [0] * (n + 1)
-    for i in range(2, n + 1):
-        if typ == "chain":
-            par[i] = i - 1
-        elif typ == "star":
-            par[i] = 1
-        elif typ == "deep":
-            par[i] = i - 1 if rnd.random() < 0.92 else rnd.randint(1, i - 1)
-        elif typ == "broom":
-            h = n // 2
-            par[i] = i - 1 if i <= h else rnd.randint(max(1, h - 1), h)
-        else:
-            par[i] = rnd.randint(1, i - 1)
-    return par
+공개 샘플의 트리에서 $u=4$, $v=7$을 따라가 보자. $dep[4]=2$, $dep[7]=3$이므로 $7$을 한 칸 올려 $6$으로 만든다. 이제 $(4, 6)$은 둘 다 깊이 $2$다. 큰 $j$부터 보면 $up[1][4]=1$, $up[1][6]=1$로 같으니 건너뛰고, $up[0][4]=2 \ne up[0][6]=3$이라 둘을 한 칸 올려 $(2, 3)$이 된다. 루프가 끝나면 답은 $up[0][2] = 1$이다.
 
-def main():
-    data = sys.stdin.read().split()
-    seed = int(data[0]); n = int(data[1]); q = int(data[2])
-    typ = data[3] if len(data) > 3 else "rand"
-    rnd = random.Random()
-    rnd.seed(seed)
-    par = build_par(n, typ, rnd)
+깊이를 맞춘 뒤 $u$와 $v$가 이미 같다면(한쪽이 다른 쪽의 조상인 경우) 그 값이 그대로 답이다. $u = v$인 질의도 이 분기에서 자연스럽게 처리된다.
 
-    ch = [[] for _ in range(n + 1)]
-    for i in range(2, n + 1):
-        ch[par[i]].append(i)
-
-    # ancestor-descendant pairs collected along the DFS stack
-    anc_pairs = []
-    need = q // 2
-    path = []
-    st = [(1, 0)]
-    while st:
-        v, state = st.pop()
-        if state == 0:
-            path.append(v)
-            st.append((v, 1))
-            if len(path) > 1 and len(anc_pairs) < need and rnd.random() < 0.6:
-                a = path[rnd.randint(0, len(path) - 2)]
-                anc_pairs.append((a, v))
-            for c in ch[v]:
-                st.append((c, 0))
-        else:
-            path.pop()
-
-    qs = []
-    for a, b in anc_pairs[:need]:
-        if rnd.random() < 0.5:
-            qs.append((b, a))
-        else:
-            qs.append((a, b))
-    while len(qs) < q:
-        r = rnd.random()
-        if r < 0.06:
-            v = rnd.randint(1, n); qs.append((v, v))
-        else:
-            qs.append((rnd.randint(1, n), rnd.randint(1, n)))
-    rnd.shuffle(qs)
-
-    lab = list(range(n + 1))
-    tail = lab[2:]
-    rnd.shuffle(tail)
-    lab[2:] = tail
-
-    out = ["%d %d" % (n, q)]
-    edges = []
-    for i in range(2, n + 1):
-        a, b = lab[i], lab[par[i]]
-        if rnd.random() < 0.5:
-            a, b = b, a
-        edges.append((a, b))
-    rnd.shuffle(edges)
-    for a, b in edges:
-        out.append("%d %d" % (a, b))
-    for u, v in qs:
-        out.append("%d %d" % (lab[u], lab[v]))
-    sys.stdout.write("\n".join(out) + "\n")
-
-main()
-~~~
-~~~solution python3
-import sys
-
-def main():
-    data = sys.stdin.buffer.read().split()
-    p = 0
-    n = int(data[p]); p += 1
-    q = int(data[p]); p += 1
-    head = [0] * (n + 1)
-    nxt = [0] * (2 * n)
-    dst = [0] * (2 * n)
-    cnt = 1
-    for _ in range(n - 1):
-        a = int(data[p]); p += 1
-        b = int(data[p]); p += 1
-        cnt += 1; dst[cnt] = b; nxt[cnt] = head[a]; head[a] = cnt
-        cnt += 1; dst[cnt] = a; nxt[cnt] = head[b]; head[b] = cnt
-
-    par = [0] * (n + 1)
-    dep = [0] * (n + 1)
-    vis = bytearray(n + 1)
-    vis[1] = 1
-    stack = [1]
-    while stack:
-        v = stack.pop()
-        dv = dep[v]
-        e = head[v]
-        while e:
-            u = dst[e]
-            if not vis[u]:
-                vis[u] = 1
-                par[u] = v
-                dep[u] = dv + 1
-                stack.append(u)
-            e = nxt[e]
-
-    LOG = 1
-    while (1 << LOG) <= n:
-        LOG += 1
-    up = [par]
-    for _ in range(1, LOG):
-        prev = up[-1]
-        up.append([prev[prev[v]] for v in range(n + 1)])
-
-    out = []
-    ap = out.append
-    for _ in range(q):
-        u = int(data[p]); p += 1
-        v = int(data[p]); p += 1
-        if dep[u] < dep[v]:
-            u, v = v, u
-        d = dep[u] - dep[v]
-        k = 0
-        while d:
-            if d & 1:
-                u = up[k][u]
-            d >>= 1
-            k += 1
-        if u != v:
-            for k in range(LOG - 1, -1, -1):
-                uk = up[k]
-                if uk[u] != uk[v]:
-                    u = uk[u]
-                    v = uk[v]
-            u = par[u]
-        ap(u)
-    sys.stdout.write("\n".join(map(str, out)) + "\n")
-
-main()
-~~~
-~~~validator cpp
-// 독립 구현: 희소 배열로 한 칸씩 올라가는 대신,
-// 오일러 경로를 펼친 뒤 깊이에 대한 구간 최솟값(sparse table)으로 LCA 를 구한다.
-#include <bits/stdc++.h>
-using namespace std;
-
-int main() {
-    int n, q;
-    if (scanf("%d %d", &n, &q) != 2) return 0;
-    vector<int> head(n + 1, -1), nxt(2 * (n > 1 ? n - 1 : 1)), dst(2 * (n > 1 ? n - 1 : 1));
-    int ec = 0;
-    for (int i = 0; i < n - 1; i++) {
-        int a, b; scanf("%d %d", &a, &b);
-        dst[ec] = b; nxt[ec] = head[a]; head[a] = ec++;
-        dst[ec] = a; nxt[ec] = head[b]; head[b] = ec++;
-    }
-    vector<int> first(n + 1, -1), euler;
-    euler.reserve(2 * n);
-    vector<int> dep(n + 1, 0), par(n + 1, 0), it(head);
-    vector<char> vis(n + 1, 0);
-    vector<int> st;
-    st.push_back(1); vis[1] = 1;
-    first[1] = 0; euler.push_back(1);
-    while (!st.empty()) {
-        int v = st.back();
-        int e = it[v];
-        bool moved = false;
-        while (e != -1) {
-            int u = dst[e];
-            e = nxt[e];
-            if (!vis[u]) {
-                it[v] = e;
-                vis[u] = 1; par[u] = v; dep[u] = dep[v] + 1;
-                first[u] = (int)euler.size();
-                euler.push_back(u);
-                st.push_back(u);
-                moved = true;
-                break;
-            }
-        }
-        if (moved) continue;
-        it[v] = -1;
-        st.pop_back();
-        if (!st.empty()) euler.push_back(st.back());
-    }
-    int m = (int)euler.size();
-    int LOG = 1;
-    while ((1 << LOG) <= m) LOG++;
-    vector<vector<int>> sp(LOG, vector<int>(m));
-    for (int i = 0; i < m; i++) sp[0][i] = euler[i];
-    for (int k = 1; k < LOG; k++) {
-        int len = 1 << k;
-        for (int i = 0; i + len <= m; i++) {
-            int a = sp[k - 1][i], b = sp[k - 1][i + (len >> 1)];
-            sp[k][i] = (dep[a] <= dep[b]) ? a : b;
-        }
-    }
-    vector<int> lg(m + 1, 0);
-    for (int i = 2; i <= m; i++) lg[i] = lg[i >> 1] + 1;
-    string out;
-    out.reserve(q * 7);
-    char buf[16];
-    for (int i = 0; i < q; i++) {
-        int u, v; scanf("%d %d", &u, &v);
-        int l = first[u], r = first[v];
-        if (l > r) swap(l, r);
-        int k = lg[r - l + 1];
-        int a = sp[k][l], b = sp[k][r - (1 << k) + 1];
-        int res = (dep[a] <= dep[b]) ? a : b;
-        int len = sprintf(buf, "%d\n", res);
-        out.append(buf, len);
-    }
-    fputs(out.c_str(), stdout);
-    return 0;
+```java
+if (dep[u] < dep[v]) { int t = u; u = v; v = t; }
+int d = dep[u] - dep[v];
+for (int k = 0; d != 0; k++, d >>= 1) if ((d & 1) != 0) u = up[k][u];
+if (u != v) {
+    for (int k = LOG - 1; k >= 0; k--)
+        if (up[k][u] != up[k][v]) { u = up[k][u]; v = up[k][v]; }
+    u = up[0][u];
 }
-~~~
-~~~case
-101 100000 100000 rand
-~~~
-~~~case
-107 100000 100000 chain
-~~~
-~~~case
-113 100000 100000 deep
-~~~
-~~~case
-121 99999 100000 broom
-~~~
-~~~case
-131 100000 100000 star
-~~~
+```
+
+전체 자바 코드는 `java/A2-Solution.java` 참고.
+
+## 복잡도
+
+- 시간: 표 만들기 $O(N \log N)$, 질의당 $O(\log N)$ → 전체 $O((N + Q)\log N)$.
+- 공간: $O(N \log N)$. $N = 10^5$, $LOG = 17$이면 int 배열 약 $1.7 \times 10^6$칸이라 넉넉하다.
+
+## 구현 노트
+
+- 부모와 깊이를 구하는 탐색도 반복문으로 짠다. 깊이 $10^5$ 사슬에서 재귀는 스택이 터진다.
+- 뿌리의 부모는 $0$번(가상 정점)으로 두고 $up[j][0] = 0$을 유지하면 경계 검사를 따로 하지 않아도 된다. 이 처리를 빼먹으면 배열 밖 접근이나 무한 루프가 난다.
+- 두 번째 루프의 조건은 `up[k][u] != up[k][v]`이지 `u != v`가 아니다. 같아지는 지점에서 멈춰야 LCA를 지나치지 않는다.
+- 검증기는 희소 배열을 쓰지 않고 오일러 경로를 펼쳐 깊이 최솟값을 구하는 방식이다. 접근이 달라서 $LOG$ 값을 하나 작게 잡거나 깊이 맞추기를 빠뜨린 구현이 곧바로 걸린다.
+
+## 흔한 실수
+
+- $LOG$를 너무 작게 잡기. $2^{LOG} > N$이 되도록 잡아야 한다.
+- 깊이를 맞추지 않고 바로 함께 올리기. 깊이가 다르면 답이 어긋난다.
+- 한쪽이 다른 쪽의 조상인 경우($u=5$, $v=2$ 같은)를 처리하지 않아 한 칸 더 올라간 정점을 출력.
+- 질의마다 `println` 호출로 인한 출력 시간 초과.

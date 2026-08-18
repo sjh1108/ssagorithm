@@ -1,319 +1,66 @@
----
-title: 관측소 케이블 부설
-difficulty: GOLD
-tags: 최소 스패닝 트리, 그래프 이론, 유니온 파인드, 정렬
-timeLimit: 4
-memoryLimit: 512
-isPublic: true
----
-<!-- @description -->
-산맥 곳곳에 관측소 $N$개가 흩어져 있다. 관측소에는 $1$번부터 $N$번까지 번호가 붙어 있다.
+# 관측소 케이블 부설 해설
 
-관측소끼리 자료를 주고받으려면 케이블을 깔아야 한다. 측량 결과 부설이 가능한 **후보 케이블** $M$개가 나왔다. $i$번 후보 케이블은 관측소 $u_i$와 $v_i$를 직접 잇고, 부설하는 데 비용 $w_i$가 든다. 후보에 없는 두 관측소를 직접 잇는 것은 지형 때문에 불가능하다.
+## 문제 요약
 
-이 후보 중 일부를 골라 부설한다. 어떤 두 관측소든 부설한 케이블만 타고(중간에 다른 관측소를 여러 번 거쳐도 된다) 자료가 오갈 수 있으면 관측소 전체가 **연결되었다**고 한다.
+정점 $N$개와 가중치가 붙은 후보 간선 $M$개가 주어진다. 모든 정점을 연결하는 간선 부분집합 중 가중치 합이 최소인 것을 찾아 그 합을 출력하고, 연결이 불가능하면 $-1$을 출력한다. 최소 신장 트리(MST) 문제 그대로다.
 
-전체를 연결하는 데 드는 최소 총비용을 구한다. 후보 케이블을 전부 부설해도 전체가 연결되지 않으면 연결이 불가능하다.
+## 관찰
 
-같은 두 관측소를 잇는 후보 케이블이 비용만 다르게 여러 개 나올 수 있다. 자기 자신을 잇는 후보는 없다.
+**첫째, 답이 되는 케이블 집합은 트리다.** 전체를 연결하면서 비용이 최소라면 사이클이 있을 수 없다. 사이클이 하나라도 있으면 그중 아무 케이블이나 하나 빼도 연결이 유지되는데 비용은 줄어들기 때문이다($w \ge 1$). 따라서 답에 들어가는 케이블은 정확히 $N-1$개다.
 
-#### 예시
+**둘째, 모든 후보를 다 훑는 방식은 전부 막힌다.** 크기 $N-1$인 부분집합을 다 만들어 보는 것은 $\binom{M}{N-1}$개라 논외고, 신장 트리를 하나씩 열거하는 것도 개수가 지수적으로 늘어난다. $M$이 $300{,}000$이므로 $M$을 한 번 정렬해서 훑는 정도, 즉 $O(M \log M)$ 언저리로 끝내야 한다.
 
-관측소가 $6$개, 후보 케이블이 $7$개이고 다음과 같다고 하자.
+**셋째, 싼 것부터 집어도 손해가 없다.** 지금까지 만들어진 덩어리들을 어떤 식으로 둘로 갈라도, 그 경계를 넘는 케이블 중 가장 싼 것은 최소 신장 트리에 반드시 포함시킬 수 있다(컷 성질). 그래서 "비용이 가장 싼 케이블부터 보면서, 양 끝이 아직 다른 덩어리에 있으면 채택하고 같은 덩어리면 버린다"를 반복해도 최적을 놓치지 않는다. 되돌아가서 선택을 취소할 일이 생기지 않는다는 뜻이라, 정렬 한 번과 한 번의 순회로 답이 나온다.
 
-```
-1-2 (비용 3)   1-3 (비용 1)   2-3 (비용 5)   3-4 (비용 4)
-4-5 (비용 2)   5-6 (비용 7)   2-5 (비용 6)
-```
+이 관찰들을 합치면 필요한 연산은 두 가지뿐이다. 간선을 비용순으로 나열하는 것, 그리고 "이 두 정점이 지금 같은 덩어리인가"를 빠르게 답하는 것.
 
-비용이 싼 케이블부터 훑으면서, 그 케이블이 **아직 서로 연결되지 않은 두 덩어리**를 이어 줄 때만 부설한다고 하자.
+## 풀이
 
-| 순서 | 케이블 | 비용 | 판단 |
-|---|---|---|---|
-| 1 | 1-3 | 1 | 부설한다. 덩어리: $\{1,3\}$ |
-| 2 | 4-5 | 2 | 부설한다. 덩어리: $\{1,3\}, \{4,5\}$ |
-| 3 | 1-2 | 3 | 부설한다. 덩어리: $\{1,2,3\}, \{4,5\}$ |
-| 4 | 3-4 | 4 | 부설한다. 덩어리: $\{1,2,3,4,5\}$ |
-| 5 | 2-3 | 5 | $2$와 $3$은 이미 같은 덩어리다. 건너뛴다 |
-| 6 | 2-5 | 6 | $2$와 $5$는 이미 같은 덩어리다. 건너뛴다 |
-| 7 | 5-6 | 7 | 부설한다. 덩어리: $\{1,2,3,4,5,6\}$ |
+두 번째 연산은 유니온 파인드(서로소 집합)가 맡는다.
 
-부설한 케이블은 $1-3$, $4-5$, $1-2$, $3-4$, $5-6$ 다섯 개이고 총비용은 $1+2+3+4+7 = 17$이다.
-<!-- @input -->
-첫째 줄에 관측소의 수 $N$과 후보 케이블의 수 $M$이 공백으로 구분되어 주어진다. ($2 \le N \le 200{,}000$, $1 \le M \le 300{,}000$)
+1. 모든 후보 간선을 비용 오름차순으로 정렬한다.
+2. `par[i] = i`로 초기화한다. 각 정점이 혼자 있는 덩어리다.
+3. 정렬 순서대로 간선 $(u, v, w)$를 꺼낸다. `find(u)`와 `find(v)`가 같으면 이미 연결된 쌍이므로 버린다. 다르면 두 덩어리를 합치고 $w$를 답에 더한다. 채택한 간선 수를 센다.
+4. 채택 수가 $N-1$이 되면 즉시 멈춘다. 끝까지 훑었는데도 $N-1$에 못 미치면 그래프가 애초에 연결 그래프가 아니라는 뜻이므로 $-1$을 출력한다.
 
-다음 $M$개의 줄에 후보 케이블 하나의 정보 $u$, $v$, $w$가 공백으로 구분되어 주어진다. ($1 \le u, v \le N$, $u \ne v$, $1 \le w \le 10^{12}$) 이 케이블은 관측소 $u$와 $v$를 잇고 비용은 $w$이다.
+`find`에는 경로 압축을, `union`에는 union by size(작은 덩어리를 큰 덩어리 밑에 붙이기)를 함께 쓴다. 둘을 같이 쓰면 연산 하나가 사실상 상수 시간이다.
 
-같은 관측소 쌍이 여러 줄에 걸쳐 서로 다른 비용으로 주어질 수 있다. 케이블이 주어지는 순서는 정해져 있지 않으며, 비용 순으로 정렬되어 들어올 수도 있다.
+공개 샘플($N=6$, $M=7$)로 따라가면 이렇게 흘러간다.
 
-케이블 비용이 최대 $10^{12}$이고 최대 $199{,}999$개를 부설할 수 있으므로, **총비용은 32비트 정수 범위를 훨씬 넘을 수 있다.** 64비트 정수를 써야 한다.
-<!-- @output -->
-전체 관측소를 연결하는 데 드는 최소 총비용을 한 줄에 출력한다.
+| 순서 | 간선 | 비용 | find 결과 | 처리 | 누적 |
+|---|---|---|---|---|---|
+| 1 | 1-3 | 1 | 1 ≠ 3 | 합침 | 1 |
+| 2 | 4-5 | 2 | 4 ≠ 5 | 합침 | 3 |
+| 3 | 1-2 | 3 | 1 ≠ 2 | 합침 | 6 |
+| 4 | 3-4 | 4 | {1,2,3} ≠ {4,5} | 합침 | 10 |
+| 5 | 2-3 | 5 | 같음 | 버림 | 10 |
+| 6 | 2-5 | 6 | 같음 | 버림 | 10 |
+| 7 | 5-6 | 7 | {1..5} ≠ 6 | 합침 | 17 |
 
-후보 케이블을 모두 부설해도 전체가 연결되지 않으면 $-1$을 출력한다.
-<!-- @testcases -->
-~~~input sample
-6 7
-1 2 3
-1 3 1
-2 3 5
-3 4 4
-4 5 2
-5 6 7
-2 5 6
-~~~
-~~~output
-17
-~~~
-~~~input
-2 1
-1 2 1000000000000
-~~~
-~~~output
-1000000000000
-~~~
-~~~input
-5 3
-1 2 4
-2 3 9
-4 5 6
-~~~
-~~~output
--1
-~~~
-~~~input
-5 10
-1 2 1000000
-1 3 1000000
-1 4 1000000
-1 5 1000000
-2 3 1000000
-2 4 1000000
-2 5 1000000
-3 4 1000000
-3 5 1000000
-4 5 1000000
-~~~
-~~~output
-4000000
-~~~
-~~~input
-6 7
-1 2 1000000000000
-2 3 999999999999
-3 4 1000000000000
-4 5 999999999998
-5 6 1000000000000
-1 6 1000000000000
-2 5 999999999997
-~~~
-~~~output
-4999999999994
-~~~
-~~~input
-4 7
-1 2 1
-1 2 2
-2 3 3
-2 3 4
-3 4 5
-1 4 6
-1 3 7
-~~~
-~~~output
-9
-~~~
-<!-- @generator -->
-생성기 stdin 형식: `seed n m wmax type [comps]`
-type 은 rand(무작위 연결) / chain(사슬 + 무작위 추가 간선) / disc(comps 개 덩어리로 쪼개 비연결).
-케이스 크기는 생성 입력 4MB 미만 규칙에 맞춰 잡았다(비용이 13자리까지 가면 한 줄이 27바이트라 간선 수를 줄여야 한다).
-~~~generator python3
-import sys, random
+채택한 간선이 5개 = $N-1$이므로 답은 17이다.
 
-def main():
-    data = sys.stdin.read().split()
-    seed = int(data[0]); n = int(data[1]); m = int(data[2]); wmax = int(data[3])
-    typ = data[4] if len(data) > 4 else "rand"
-    comps = int(data[5]) if len(data) > 5 else 1
-    rnd = random.Random()
-    rnd.seed(seed)
+다중 간선은 신경 쓸 게 없다. 같은 쌍이 여러 번 나와도 처음(가장 싼) 것만 채택되고 나머지는 전부 "같은 덩어리"에 걸려 버려진다. 별도로 중복을 제거할 필요가 없다.
 
-    pairs = []
-    if typ == "disc":
-        # 정점을 comps 개의 덩어리로 나누고 덩어리 안에서만 간선을 만든다 -> 반드시 비연결
-        bound = [1]
-        step = n // comps
-        for c in range(1, comps):
-            bound.append(c * step + 1)
-        bound.append(n + 1)
-        blocks = [(bound[c], bound[c + 1] - 1) for c in range(comps)]
-        for lo, hi in blocks:
-            for i in range(lo + 1, hi + 1):
-                pairs.append((rnd.randint(lo, i - 1), i))
-        rest = m - len(pairs)
-        for _ in range(max(0, rest)):
-            lo, hi = blocks[rnd.randrange(comps)]
-            if hi - lo < 1:
-                lo, hi = blocks[-1]
-            a = rnd.randint(lo, hi); b = rnd.randint(lo, hi)
-            while b == a:
-                b = rnd.randint(lo, hi)
-            pairs.append((a, b))
-    else:
-        # 먼저 신장 트리를 깔아 연결을 보장하고, 남은 개수만큼 아무 쌍이나 덧붙인다
-        for i in range(2, n + 1):
-            if typ == "chain":
-                pairs.append((i - 1, i))
-            else:
-                pairs.append((rnd.randint(1, i - 1), i))
-        for _ in range(max(0, m - (n - 1))):
-            a = rnd.randint(1, n); b = rnd.randint(1, n)
-            while b == a:
-                b = rnd.randint(1, n)
-            pairs.append((a, b))
+전체 자바 코드는 `java/A2-Solution.java` 참고.
 
-    # 번호를 섞어 구조가 입력 순서에 드러나지 않게 한다
-    lab = list(range(n + 1))
-    tail = lab[1:]
-    rnd.shuffle(tail)
-    lab[1:] = tail
+## 복잡도
 
-    rnd.shuffle(pairs)
-    out = ["%d %d" % (n, len(pairs))]
-    ri = rnd.randint
-    for a, b in pairs:
-        x, y = lab[a], lab[b]
-        if ri(0, 1):
-            x, y = y, x
-        out.append("%d %d %d" % (x, y, ri(1, wmax)))
-    sys.stdout.write("\n".join(out) + "\n")
+시간: $O(M \log M)$. 간선 정렬이 $O(M \log M)$이고, 그 뒤 순회는 간선마다 유니온 파인드 연산 두세 번이라 $O(M \alpha(N))$으로 사실상 $O(M)$이다. 정렬이 전부를 지배한다.
 
-main()
-~~~
-~~~solution python3
-import sys
+공간: $O(N + M)$. 간선 배열이 $M$, 유니온 파인드 배열이 $N$이다.
 
-def main():
-    nums = list(map(int, sys.stdin.buffer.read().split()))
-    n = nums[0]
-    # 간선을 (비용, u, v) 로 묶어 비용 오름차순 정렬 -> 크루스칼
-    edges = sorted(zip(nums[4::3], nums[2::3], nums[3::3]))
-    par = list(range(n + 1))
-    sz = [1] * (n + 1)
-    total = 0
-    used = 0
-    need = n - 1
-    for w, u, v in edges:
-        ru = u
-        while par[ru] != ru:
-            ru = par[ru]
-        while par[u] != ru:      # 경로 압축
-            par[u], u = ru, par[u]
-        rv = v
-        while par[rv] != rv:
-            rv = par[rv]
-        while par[v] != rv:
-            par[v], v = rv, par[v]
-        if ru == rv:
-            continue
-        if sz[ru] < sz[rv]:      # union by size
-            ru, rv = rv, ru
-        par[rv] = ru
-        sz[ru] += sz[rv]
-        total += w
-        used += 1
-        if used == need:
-            break
-    sys.stdout.write(("%d" % total if used == need else "-1") + "\n")
+## 구현 노트
 
-main()
-~~~
-~~~validator cpp
-// 독립 구현: 정렬 + 유니온 파인드(크루스칼) 대신
-// 우선순위 큐를 쓰는 프림 알고리즘으로 최소 신장 트리를 만든다.
-// 연결 여부는 트리에 들어온 정점 개수로 판정한다.
-#include <bits/stdc++.h>
-using namespace std;
+- **합은 반드시 64비트.** $w$가 최대 $10^{12}$이고 최대 $199{,}999$개를 더하므로 최댓값이 $2 \times 10^{17}$ 규모다. `int`로 받으면 값 하나부터 이미 넘친다. 자바는 `long`, 파이썬은 신경 쓸 필요 없다.
+- **정렬 키를 하나의 `long`으로 묶는 방법.** 자바에서 `Integer[]`나 객체 배열을 정렬하면 박싱 비용이 붙는다. $w < 2^{40}$, 간선 번호 $< 2^{19}$이므로 `(w << 19) | i`로 합쳐 `long[]`을 `Arrays.sort`로 정렬하면 비용 오름차순이 그대로 유지되면서 기본형 정렬을 쓸 수 있다. 시프트 폭이 간선 수를 담기에 충분한지(300,000 < 524,288) 확인하고 쓴다.
+- **`find` 재귀 주의.** 경로 압축을 재귀로 짜면 사슬 모양 입력에서 깊이가 $200{,}000$까지 갈 수 있다. 자바 기본 스택으로는 위험하므로 반복문으로 구현하거나 union by size를 반드시 함께 적용한다. 위 코드는 while 두 번으로 반복 구현했다.
+- **$-1$ 판정은 채택한 간선 수로.** 정렬 순회가 끝난 뒤 `used == N-1`인지 본다. "간선이 $N-1$개 미만이면 $-1$" 같은 입력 개수 기준 판정은 다중 간선 때문에 틀린다.
+- 이 문제의 검증기는 정렬도 유니온 파인드도 쓰지 않고 우선순위 큐 기반 프림으로 같은 답을 낸다. 크루스칼 구현에서 자주 나오는 실수(경로 압축 시 부모 갱신 누락, 이미 연결된 간선을 세어 버려 $-1$ 판정이 어긋나는 경우)는 두 구현의 답이 갈리므로 곧바로 잡힌다.
 
-static char ibuf[1 << 16];
-static size_t ipos = 0, ilen = 0;
+## 흔한 실수
 
-static inline int gc() {
-    if (ipos == ilen) {
-        ilen = fread(ibuf, 1, sizeof(ibuf), stdin);
-        ipos = 0;
-        if (ilen == 0) return -1;
-    }
-    return ibuf[ipos++];
-}
-
-static inline long long readInt() {
-    int c = gc();
-    while (c != -1 && (c < '0' || c > '9') && c != '-') c = gc();
-    long long sgn = 1;
-    if (c == '-') { sgn = -1; c = gc(); }
-    long long x = 0;
-    while (c >= '0' && c <= '9') { x = x * 10 + (c - '0'); c = gc(); }
-    return x * sgn;
-}
-
-int main() {
-    int n = (int)readInt();
-    int m = (int)readInt();
-    vector<int> eu(m), ev(m);
-    vector<long long> ew(m);
-    vector<int> deg(n + 2, 0);
-    for (int i = 0; i < m; i++) {
-        eu[i] = (int)readInt();
-        ev[i] = (int)readInt();
-        ew[i] = readInt();
-        deg[eu[i]]++;
-        deg[ev[i]]++;
-    }
-    // CSR 인접 리스트
-    vector<int> start(n + 2, 0);
-    for (int v = 1; v <= n; v++) start[v + 1] = start[v] + deg[v];
-    vector<int> pos(start.begin(), start.end());
-    vector<int> adjTo(2 * (size_t)m);
-    vector<long long> adjW(2 * (size_t)m);
-    for (int i = 0; i < m; i++) {
-        adjTo[pos[eu[i]]] = ev[i]; adjW[pos[eu[i]]++] = ew[i];
-        adjTo[pos[ev[i]]] = eu[i]; adjW[pos[ev[i]]++] = ew[i];
-    }
-
-    vector<char> vis(n + 1, 0);
-    priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> pq;
-    pq.push(make_pair(0LL, 1));
-    long long total = 0;
-    int taken = 0;
-    while (!pq.empty()) {
-        pair<long long, int> cur = pq.top();
-        pq.pop();
-        int v = cur.second;
-        if (vis[v]) continue;
-        vis[v] = 1;
-        total += cur.first;
-        taken++;
-        if (taken == n) break;
-        for (int e = start[v]; e < start[v + 1]; e++) {
-            int u = adjTo[e];
-            if (!vis[u]) pq.push(make_pair(adjW[e], u));
-        }
-    }
-    if (taken == n) printf("%lld\n", total);
-    else printf("-1\n");
-    return 0;
-}
-~~~
-~~~case
-1009 130000 150000 1000000000000 rand
-~~~
-~~~case
-2027 140000 165000 1000000000 chain
-~~~
-~~~case
-3041 120000 140000 1000000000000 disc 6
-~~~
-~~~case
-4093 200000 230000 5 rand
-~~~
+- 총비용을 `int`로 받아 오버플로. 지문에 32비트를 넘는다고 적혀 있는데도 자주 놓친다. 테스트에는 $10^{12}$짜리 케이블만 여러 개 나오는 케이스가 들어 있다.
+- 연결 불가능한 입력에서 $-1$ 대신 "지금까지 모은 합"을 출력. 마지막에 채택 수를 반드시 확인한다.
+- 유니온 파인드 없이 매번 BFS/DFS로 연결 여부를 확인해 $O(M(N+M))$이 되는 구현. $M$이 $300{,}000$이라 시간 안에 끝나지 않는다.
+- 같은 정점 쌍의 다중 간선을 미리 걸러 내려다 더 싼 쪽을 지우는 실수. 정렬만 해 두면 저절로 처리되므로 손대지 않는 편이 안전하다.
+- 비용이 전부 같은 그래프에서 동점 처리를 잘못해 무한 루프나 잘못된 개수를 세는 경우. 비용이 같아도 판단 기준은 "두 끝이 같은 덩어리인가" 하나뿐이다.

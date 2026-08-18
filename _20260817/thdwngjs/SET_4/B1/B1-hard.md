@@ -1,257 +1,85 @@
----
-title: 컨베이어 벨트 부품 검수
-difficulty: GOLD
-tags: 투 포인터, 슬라이딩 윈도우, 덱, 자료 구조
-timeLimit: 5
-memoryLimit: 512
-isPublic: true
----
-<!-- @description -->
-공장 컨베이어 벨트 위에 부품 $N$개가 일렬로 놓여 흘러간다. 왼쪽부터 $i$번째 부품의 높이는 $a_i$다.
+# 컨베이어 벨트 부품 검수 해설
 
-검수 로봇은 벨트 위에서 **연속한 구간**을 통째로 집어 하나의 상자에 담는다. 상자는 높이 차가 큰 부품이 섞이면 뚜껑이 닫히지 않으므로, 집어 든 구간 안에서 가장 높은 부품과 가장 낮은 부품의 높이 차가 $D$ 이하일 때만 포장할 수 있다.
+## 문제 요약
 
-즉 구간 $[l, r]$ $(1 \le l \le r \le N)$ 은
+길이 $N$인 수열에서 연속 구간 $[l, r]$ 중 최댓값과 최솟값의 차가 $D$ 이하인 것의 개수를 구한다. 길이 1인 구간도 센다.
 
-$$\max(a_l, a_{l+1}, \dots, a_r) - \min(a_l, a_{l+1}, \dots, a_r) \le D$$
+## 관찰
 
-일 때 포장 가능하다. 포장 가능한 구간이 모두 몇 개인지 구하여라. 길이가 1인 구간은 최댓값과 최솟값이 같아 차가 $0$ 이므로 언제나 포장 가능하고, 이것도 개수에 포함한다.
+가장 먼저 떠오르는 방법은 모든 $(l, r)$ 쌍을 훑는 것이다. $l$을 고정하고 $r$을 늘리면서 최댓값과 최솟값을 갱신하면 한 쌍당 $O(1)$이므로 전체 $O(N^2)$인데, $N = 300{,}000$ 이면 대략 $4.5 \times 10^{10}$ 번이라 시간 안에 끝나지 않는다. 세그먼트 트리로 구간 최대·최소를 물어보는 방식도 쌍의 개수 자체가 $O(N^2)$이라 아무 도움이 안 된다.
 
-구간은 시작 위치와 끝 위치의 쌍으로 구별한다. 내용이 같은 수열이더라도 위치가 다르면 다른 구간이다.
+여기서 두 가지를 눈치채야 한다.
 
-답은 최대 $N(N+1)/2 = 45{,}000{,}150{,}000$ 까지 커지므로 **32비트 정수 범위를 넘는다.** 64비트 정수(자바 `long`, C++ `long long`)로 세야 한다.
+**관찰 1. 구간을 넓히면 최대와 최소의 차는 절대 줄지 않는다.** 오른쪽으로 한 칸 늘리면 최댓값은 그대로거나 커지고 최솟값은 그대로거나 작아진다. 그래서 $l$을 고정했을 때 "차 $\le D$"를 만족하는 $r$은 어떤 경계까지 쭉 이어지다가 그 뒤로는 전부 실패한다. 조건이 구간 길이에 대해 단조롭다는 뜻이고, 덕분에 각 $l$마다 **경계 하나만 찾으면** 개수를 바로 얻는다.
 
-#### 예시
+**관찰 2. $r$을 오른쪽으로 옮기면 그 경계도 오른쪽으로만 간다.** $r$을 고정하고 조건을 만족하는 가장 작은 $l$을 $L(r)$이라 하자. $[L(r), r]$이 조건을 만족하면 그 부분 구간인 $[L(r), r-1]$도 만족하므로 $L(r-1) \le L(r)$이다. 즉 $L$은 절대 되돌아가지 않는다. 그래서 $l$과 $r$을 각각 한 방향으로만 밀면 되고(투 포인터), 두 포인터의 이동 횟수 합은 $2N$을 넘지 않는다.
 
-$N = 8$, $D = 3$, 수열이 다음과 같다고 하자.
+남은 문제는 창이 움직이는 동안 **현재 창의 최댓값과 최솟값을 어떻게 빠르게 유지하느냐**다.
 
-```
-위치:  1  2  3  4  5  6  7  8
-높이:  3  1  4  1  5  9  2  6
-```
+## 풀이
 
-포장 가능한 구간은 모두 14개다.
+슬라이딩 윈도우의 최댓값·최솟값 유지는 단조 덱(monotonic deque)의 전형적인 용도다. 인덱스를 담는 덱 두 개를 쓴다.
 
-- 길이 1인 구간 8개: $[1,1], [2,2], [3,3], [4,4], [5,5], [6,6], [7,7], [8,8]$ — 차가 모두 $0$
-- 길이 2 이상인 구간 6개
-  - $[1,2] = (3, 1)$ → 차 $2$
-  - $[1,3] = (3, 1, 4)$ → 차 $3$
-  - $[1,4] = (3, 1, 4, 1)$ → 차 $3$
-  - $[2,3] = (1, 4)$ → 차 $3$
-  - $[2,4] = (1, 4, 1)$ → 차 $3$
-  - $[3,4] = (4, 1)$ → 차 $3$
+- `maxq`: 담긴 인덱스의 값이 **감소하는** 순서 → 맨 앞이 현재 창의 최댓값
+- `minq`: 담긴 인덱스의 값이 **증가하는** 순서 → 맨 앞이 현재 창의 최솟값
 
-$[1,5] = (3, 1, 4, 1, 5)$ 는 차가 $5 - 1 = 4$ 라서 세지 않고, $[5,6] = (5, 9)$ 도 차가 $4$ 라서 세지 않는다.
-<!-- @input -->
-첫째 줄에 부품의 개수 $N$과 허용 높이 차 $D$가 공백으로 구분되어 주어진다.
+$r$을 하나 늘릴 때마다,
 
-둘째 줄에 부품의 높이 $a_1, a_2, \dots, a_N$이 공백으로 구분되어 주어진다.
+1. `maxq` 뒤쪽에서 $a_r$ 이하인 값들을 버린다. 뒤에 더 큰 값 $a_r$이 들어왔으니 그들은 앞으로 어떤 창에서도 최댓값이 될 수 없다. `minq`는 반대로 $a_r$ 이상인 값들을 버린다.
+2. $r$을 두 덱의 뒤에 넣는다.
+3. `a[maxq[0]] - a[minq[0]] > D`인 동안 $l$을 한 칸씩 늘린다. 이때 덱 맨 앞의 인덱스가 방금 버린 $l$과 같으면 그 덱의 앞도 하나 뺀다.
+4. 오른쪽 끝이 $r$인 유효 구간은 $[l, r], [l+1, r], \dots, [r, r]$ 이므로 $r - l + 1$개다. 이걸 답에 더한다.
 
-- $1 \le N \le 300{,}000$
-- $0 \le D \le 2 \times 10^9$
-- $-10^9 \le a_i \le 10^9$
+각 인덱스는 덱에 한 번 들어가고 한 번 나오므로 3번의 while 루프까지 포함해 전체가 $O(N)$이다.
 
-$D$ 는 32비트 정수 범위를 넘을 수 있으므로 입력을 읽을 때부터 64비트 정수로 다루는 편이 안전하다.
-<!-- @output -->
-포장 가능한 구간의 개수를 한 줄에 출력한다.
+샘플 입력($N = 8$, $D = 3$, 수열 `3 1 4 1 5 9 2 6`)으로 따라가면 이렇게 된다.
 
-값이 32비트 정수 범위를 넘을 수 있으므로 64비트 정수로 누적해야 한다.
-<!-- @testcases -->
-~~~input sample
-8 3
-3 1 4 1 5 9 2 6
-~~~
-~~~output
-14
-~~~
-~~~input
-1 0
--1000000000
-~~~
-~~~output
-1
-~~~
-~~~input
-10 0
-5 5 5 3 3 7 7 7 7 1
-~~~
-~~~output
-20
-~~~
-~~~input
-6 2000000000
--1000000000 1000000000 -1000000000 1000000000 0 7
-~~~
-~~~output
-21
-~~~
-~~~input
-5 1999999999
--1000000000 1000000000 -1000000000 1000000000 -1000000000
-~~~
-~~~output
-5
-~~~
-~~~input
-10 4
-1 2 3 4 5 6 7 8 9 10
-~~~
-~~~output
-40
-~~~
-~~~input
-12 3
-9 9 7 7 5 5 3 3 1 1 1 1
-~~~
-~~~output
-42
-~~~
-<!-- @generator -->
-케이스 형식: `<시드> <N> <모드> <D>`
-모드는 rand(완전 랜덤), same(전부 같은 값), narrow(값 범위 0~5), inc(단조 증가) 중 하나다.
-~~~generator python3
-import sys, random
+| $r$ | $a_r$ | 최소 $l$ | 창의 최대 | 창의 최소 | 더하는 개수 | 누적 |
+|---|---|---|---|---|---|---|
+| 1 | 3 | 1 | 3 | 3 | 1 | 1 |
+| 2 | 1 | 1 | 3 | 1 | 2 | 3 |
+| 3 | 4 | 1 | 4 | 1 | 3 | 6 |
+| 4 | 1 | 1 | 4 | 1 | 4 | 10 |
+| 5 | 5 | 5 | 5 | 5 | 1 | 11 |
+| 6 | 9 | 6 | 9 | 9 | 1 | 12 |
+| 7 | 2 | 7 | 2 | 2 | 1 | 13 |
+| 8 | 6 | 8 | 6 | 6 | 1 | 14 |
 
-tok = sys.stdin.read().split()
-seed = int(tok[0]); n = int(tok[1]); mode = tok[2]; d = int(tok[3])
-random.seed(seed)
-LIM = 10 ** 9
+$r = 5$에서 $a_5 = 5$가 들어오는 순간 창 `3 1 4 1 5`의 차가 4가 되어 $l$이 5까지 한 번에 밀려난다. 이때 덱 앞에서 인덱스 1~4가 차례로 빠진다. 최종 답 14는 지문의 예시와 같다.
 
-if mode == 'rand':
-    a = [random.randint(-LIM, LIM) for _ in range(n)]
-elif mode == 'same':
-    v = random.randint(-LIM, LIM)
-    a = [v] * n
-elif mode == 'narrow':
-    a = [random.randint(0, 5) for _ in range(n)]
-elif mode == 'inc':
-    step = (2 * LIM) // max(n - 1, 1)
-    cur = -LIM
-    a = []
-    for _ in range(n):
-        a.append(cur)
-        cur += random.randint(0, step)
-else:
-    raise ValueError('unknown mode')
+핵심 부분만 옮기면 다음과 같다(전체 자바 코드는 `java/B1-Solution.java` 참고).
 
-out = [str(n) + ' ' + str(d), ' '.join(map(str, a))]
-sys.stdout.write('\n'.join(out) + '\n')
-~~~
-모범답안: 투 포인터 + 단조 덱 2개로 O(N).
-~~~solution python3
-import sys
-from collections import deque
-
-def main():
-    data = sys.stdin.buffer.read().split()
-    n = int(data[0]); d = int(data[1])
-    a = list(map(int, data[2:2 + n]))
-    maxq = deque()   # 값이 감소하는 인덱스 덱: 앞이 구간 최댓값
-    minq = deque()   # 값이 증가하는 인덱스 덱: 앞이 구간 최솟값
-    l = 0
-    ans = 0
-    for r in range(n):
-        v = a[r]
-        while maxq and a[maxq[-1]] <= v:
-            maxq.pop()
-        maxq.append(r)
-        while minq and a[minq[-1]] >= v:
-            minq.pop()
-        minq.append(r)
-        # r 이 커질 때 최소 l 은 되돌아가지 않으므로 l 의 총 이동 횟수는 O(N)
-        while a[maxq[0]] - a[minq[0]] > d:
-            if maxq[0] == l:
-                maxq.popleft()
-            if minq[0] == l:
-                minq.popleft()
-            l += 1
-        ans += r - l + 1
-    sys.stdout.write(str(ans) + "\n")
-
-main()
-~~~
-검증기: 덱과 투 포인터를 쓰지 않는 독립 구현.
-희소 배열로 구간 최대/최소를 O(1)에 얻고, 각 l 마다 가능한 최대 r 을 이분 탐색으로 찾는다. O(N log N).
-~~~validator cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-static int n;
-static long long D;
-static vector<int> a;
-static vector<vector<int> > spMax, spMin;
-static vector<int> lg;
-
-int qMax(int l, int r) { int k = lg[r - l + 1]; return max(spMax[k][l], spMax[k][r - (1 << k) + 1]); }
-int qMin(int l, int r) { int k = lg[r - l + 1]; return min(spMin[k][l], spMin[k][r - (1 << k) + 1]); }
-
-int main() {
-    {
-        static char buf[1 << 16];
-        size_t len = 0, pos = 0;
-        auto gc = [&]() -> int {
-            if (pos == len) { len = fread(buf, 1, sizeof(buf), stdin); pos = 0; if (len == 0) return -1; }
-            return buf[pos++];
-        };
-        auto readInt = [&]() -> long long {
-            int c = gc();
-            while (c != -1 && (c < '0' || c > '9') && c != '-') c = gc();
-            bool neg = false;
-            if (c == '-') { neg = true; c = gc(); }
-            long long x = 0;
-            while (c >= '0' && c <= '9') { x = x * 10 + (c - '0'); c = gc(); }
-            return neg ? -x : x;
-        };
-        n = (int)readInt();
-        D = readInt();
-        a.resize(n);
-        for (int i = 0; i < n; i++) a[i] = (int)readInt();
-    }
-
-    lg.assign(n + 1, 0);
-    for (int i = 2; i <= n; i++) lg[i] = lg[i >> 1] + 1;
-    int K = lg[n] + 1;
-    spMax.assign(K, vector<int>());
-    spMin.assign(K, vector<int>());
-    spMax[0] = a; spMin[0] = a;
-    for (int k = 1; k < K; k++) {
-        int sz = n - (1 << k) + 1;
-        spMax[k].resize(max(sz, 0));
-        spMin[k].resize(max(sz, 0));
-        for (int i = 0; i < sz; i++) {
-            spMax[k][i] = max(spMax[k - 1][i], spMax[k - 1][i + (1 << (k - 1))]);
-            spMin[k][i] = min(spMin[k - 1][i], spMin[k - 1][i + (1 << (k - 1))]);
-        }
-    }
-
-    long long ans = 0;
-    for (int l = 0; l < n; l++) {
-        // 구간을 오른쪽으로 늘릴수록 최대-최소는 절대 줄지 않으므로 이분 탐색이 성립한다
-        int lo = l, hi = n - 1, best = l;
-        while (lo <= hi) {
-            int mid = lo + (hi - lo) / 2;
-            if ((long long)qMax(l, mid) - (long long)qMin(l, mid) <= D) { best = mid; lo = mid + 1; }
-            else hi = mid - 1;
-        }
-        ans += (long long)(best - l + 1);
-    }
-    printf("%lld\n", ans);
-    return 0;
+```java
+while (maxTail > maxHead && a[maxq[maxTail - 1]] <= v) maxTail--;
+maxq[maxTail++] = r;
+while (minTail > minHead && a[minq[minTail - 1]] >= v) minTail--;
+minq[minTail++] = r;
+while ((long) a[maxq[maxHead]] - (long) a[minq[minHead]] > d) {
+    if (maxq[maxHead] == l) maxHead++;
+    if (minq[minHead] == l) minHead++;
+    l++;
 }
-~~~
-최대 크기 완전 랜덤
-~~~case
-1 300000 rand 100000000
-~~~
-전부 같은 값 — 답이 45,000,150,000 으로 32비트를 크게 넘는다
-~~~case
-7 300000 same 123456789
-~~~
-값 범위가 0~5 로 매우 좁아 덱이 자주 뒤집힌다
-~~~case
-13 300000 narrow 2
-~~~
-단조 증가 — 창이 끊임없이 미끄러진다
-~~~case
-29 300000 inc 5000000
-~~~
+ans += (long) (r - l + 1);
+```
+
+## 복잡도
+
+시간: $O(N)$ — 각 인덱스가 두 덱에 각각 한 번 push, 한 번 pop 된다. $l$은 되돌아가지 않으므로 전체 이동이 $N$번 이하다. 입력을 읽는 비용도 $O(N)$이다.
+
+공간: $O(N)$ — 수열 배열 하나와 인덱스 덱 두 개. 덱을 배열로 잡아도 $N$칸씩이면 충분하다.
+
+## 구현 노트
+
+- **오버플로.** 답은 최대 $N(N+1)/2 = 45{,}000{,}150{,}000$이라 `int`로는 못 담는다. 누적 변수는 `long`이어야 한다. $D$도 최대 $2 \times 10^9$로 `int` 범위를 넘으므로 입력을 읽을 때부터 `long`으로 받는다. 최대-최소 계산도 $10^9 - (-10^9) = 2 \times 10^9$까지 나오므로 `long`으로 캐스팅해 비교한다. 이 세 곳 중 하나만 `int`로 두어도 큰 케이스에서 음수가 튀어나온다.
+- **덱에서 같은 값 처리.** 덱 뒤를 버릴 때 `<=`와 `<` 중 무엇을 쓸지 헷갈리기 쉽다. 어느 쪽을 써도 최댓값 자체는 맞지만, 같은 값을 남겨두면 덱 길이가 길어지고 앞을 버리는 조건과 엮여 실수하기 쉬우니 `<=`(최댓값 덱), `>=`(최솟값 덱)로 통일하는 편이 낫다.
+- **덱 앞을 버리는 시점.** $l$을 늘릴 때 무조건 앞을 빼면 안 된다. 덱 맨 앞의 인덱스가 지금 버리는 $l$과 **같을 때만** 뺀다. 그렇지 않으면 아직 창 안에 있는 최댓값을 잃어버린다.
+- **입출력.** $N = 300{,}000$이고 값이 최대 11자라 입력이 3MB를 넘는다. 자바에서 `Scanner`를 쓰면 이것만으로 몇 초가 날아간다. `BufferedReader` + `StringTokenizer`, 또는 이 풀이처럼 `DataInputStream` 기반 수동 파서를 쓴다.
+- 문제에 붙은 검증기는 희소 배열 + 이분 탐색($O(N \log N)$)이라 덱을 쓰지 않는다. 덱의 앞/뒤 처리를 틀린 풀이는 값 범위가 좁은 케이스(같은 값이 잔뜩 나오는 입력)에서 검증기와 답이 갈리므로 바로 걸린다.
+
+## 흔한 실수
+
+- $O(N^2)$ 브루트포스로 제출. $N \le 300{,}000$이라 $4.5 \times 10^{10}$번 연산이 필요해 통과할 수 없다. 조건이 깨지는 순간 `break` 하는 최적화를 넣어도 값이 넓게 퍼진 입력에서만 빠를 뿐, 전부 같은 값인 입력에서는 그대로 $O(N^2)$이다.
+- 답을 `int`에 누적. 샘플과 작은 케이스는 다 맞는데 큰 케이스에서만 틀린다면 대부분 이 문제다.
+- $l$을 옮길 때 덱 앞을 조건 없이 `popleft` 하거나, 반대로 아예 빼지 않는 구현. 전자는 창 안의 최댓값을 잃고 후자는 창 밖의 값을 계속 최댓값으로 쓴다.
+- 길이 1인 구간을 세지 않거나, $D = 0$일 때 같은 값이 이어지는 구간을 놓치는 경우. $r - l + 1$을 더하는 방식이면 두 경우 모두 자동으로 처리된다.
+- $D$를 `int`로 읽어 $2 \times 10^9$가 음수가 되는 경우. 이 경우 모든 구간이 조건을 어긋나 답이 $N$으로만 나온다.

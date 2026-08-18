@@ -3,7 +3,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Solution {
+public class A2_Solution {
 
     static int[] par;
     static int[] sz;

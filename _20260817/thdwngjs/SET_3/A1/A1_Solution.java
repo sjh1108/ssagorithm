@@ -5,7 +5,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Solution {
+public class A1_Solution {
 
     static int[] par;
 

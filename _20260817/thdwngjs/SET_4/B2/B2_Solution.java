@@ -1,9 +1,8 @@
 // 문제: 검사창에 잡힌 최저 높이 (GOLD)
 // 접근: 값이 증가하도록 유지되는 인덱스 덱을 굴려 각 창의 최솟값을 O(1) 에 얻고 더한다 (슬라이딩 윈도우 최솟값, O(N))
 import java.io.*;
-import java.util.*;
 
-public class Solution {
+public class B2_Solution {
     public static void main(String[] args) throws IOException {
         DataInputStream in = new DataInputStream(new BufferedInputStream(System.in, 1 << 16));
         StringBuilder sb = new StringBuilder();

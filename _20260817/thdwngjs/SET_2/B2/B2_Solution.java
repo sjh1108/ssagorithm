@@ -3,7 +3,7 @@
 //       정방향으로 훑으면 같은 동전을 여러 번 쓴 결과가 섞인다. O(M*S).
 import java.io.*;
 
-public class Solution {
+public class B2_Solution {
 
     public static void main(String[] args) throws IOException {
         int m = readInt();

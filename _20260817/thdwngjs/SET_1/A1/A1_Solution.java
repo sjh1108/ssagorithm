@@ -3,7 +3,7 @@
 //       두 조각을 합칠 때 최댓값이 같으면 개수를 더한다. 질의당 O(log N).
 import java.io.*;
 
-public class Solution {
+public class A1_Solution {
 
     static long bestMax;
     static int bestCnt;

@@ -3,7 +3,7 @@
 //       같은 동전을 몇 번이든 다시 쓸 수 있다. O(M*S).
 import java.io.*;
 
-public class Solution {
+public class B3_Solution {
 
     public static void main(String[] args) throws IOException {
         int m = readInt();

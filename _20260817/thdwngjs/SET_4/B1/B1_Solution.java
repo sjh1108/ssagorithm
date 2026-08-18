@@ -2,7 +2,7 @@
 // 접근: 오른쪽 끝을 하나씩 늘리는 투 포인터 + 최댓값/최솟값 단조 덱 2개로 O(N)
 import java.io.*;
 
-public class Solution {
+public class B1_Solution {
     public static void main(String[] args) throws IOException {
         FastReader in = new FastReader(System.in);
         StringBuilder sb = new StringBuilder();

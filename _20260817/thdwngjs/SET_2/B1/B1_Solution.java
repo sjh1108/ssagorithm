@@ -5,7 +5,7 @@
 //       O(S * sum(log(min(c_i, S/v_i)))).
 import java.io.*;
 
-public class Solution {
+public class B1_Solution {
 
     public static void main(String[] args) throws IOException {
         int m = readInt();

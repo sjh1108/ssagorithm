@@ -1,9 +1,9 @@
-// 문제: 상위 기지 판정 (SILVER)
-// 접근: 1번을 뿌리로 반복문 DFS 를 돌며 방문 시각 tin/tout 을 기록한다.
-//       u 가 v 의 조상 <=> tin[u] < tin[v] 이고 tout[v] < tout[u].
+// 문제: 공통 상위 기지 (GOLD)
+// 접근: 반복문 BFS/DFS 로 부모와 깊이를 구한 뒤 희소 배열(binary lifting) up[k][v] 를 만든다.
+//       깊이를 맞추고, 부모가 갈라지는 지점까지 함께 올라간다. 질의당 O(log N).
 import java.io.*;
 
-public class Solution {
+public class A2_Solution {
 
     public static void main(String[] args) throws IOException {
         int n = readInt();
@@ -17,41 +17,46 @@ public class Solution {
             ec++; dst[ec] = b; nxt[ec] = head[a]; head[a] = ec;
             ec++; dst[ec] = a; nxt[ec] = head[b]; head[b] = ec;
         }
-        int[] tin = new int[n + 1];
-        int[] tout = new int[n + 1];
-        int[] it = new int[n + 1];
-        int[] par = new int[n + 1];
+        int LOG = 1;
+        while ((1 << LOG) <= n) LOG++;
+        int[][] up = new int[LOG][n + 1];
+        int[] dep = new int[n + 1];
+        boolean[] vis = new boolean[n + 1];
         int[] stack = new int[n + 1];
-        System.arraycopy(head, 0, it, 0, n + 1);
-        int top = 0, timer = 1;
-        stack[top] = 1;
-        tin[1] = 1;
+        int top = 0;
+        stack[0] = 1;
+        vis[1] = true;
         while (top >= 0) {
-            int v = stack[top];
-            int e = it[v];
-            boolean moved = false;
-            while (e != 0) {
+            int v = stack[top--];
+            for (int e = head[v]; e != 0; e = nxt[e]) {
                 int u = dst[e];
-                e = nxt[e];
-                if (u != par[v] && tin[u] == 0) {
-                    it[v] = e;
-                    par[u] = v;
-                    tin[u] = ++timer;
+                if (!vis[u]) {
+                    vis[u] = true;
+                    up[0][u] = v;
+                    dep[u] = dep[v] + 1;
                     stack[++top] = u;
-                    moved = true;
-                    break;
                 }
             }
-            if (moved) continue;
-            it[v] = 0;
-            tout[v] = ++timer;
-            top--;
+        }
+        for (int k = 1; k < LOG; k++) {
+            int[] prev = up[k - 1], cur = up[k];
+            for (int v = 1; v <= n; v++) cur[v] = prev[prev[v]];
         }
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < q; i++) {
             int u = readInt(), v = readInt();
-            boolean ok = u != v && tin[u] < tin[v] && tout[v] < tout[u];
-            sb.append(ok ? "YES" : "NO").append('\n');
+            if (dep[u] < dep[v]) { int t = u; u = v; v = t; }
+            int d = dep[u] - dep[v];
+            for (int k = 0; d != 0; k++, d >>= 1) {
+                if ((d & 1) != 0) u = up[k][u];
+            }
+            if (u != v) {
+                for (int k = LOG - 1; k >= 0; k--) {
+                    if (up[k][u] != up[k][v]) { u = up[k][u]; v = up[k][v]; }
+                }
+                u = up[0][u];
+            }
+            sb.append(u).append('\n');
         }
         System.out.print(sb);
     }

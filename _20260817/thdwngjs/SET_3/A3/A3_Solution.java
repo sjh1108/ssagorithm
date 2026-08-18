@@ -3,7 +3,7 @@
 //       무리 수가 1이 되는 순간의 케이블 번호가 답이고, 끝까지 1이 안 되면 -1.
 import java.io.*;
 
-public class Solution {
+public class A3_Solution {
 
     private static int[] parent;
     private static int[] size;

@@ -1,9 +1,9 @@
-// 문제: 컨베이어 벨트의 다음 높은 부품 (SILVER)
+// 문제: 컨베이어 벨트의 다음 높은 부품 (SILVER) 
 // 접근: 높이가 단조 감소하도록 유지되는 인덱스 스택을 왼쪽부터 쌓고,
 //       새 부품이 스택 top 보다 높으면 pop 하며 그 부품들의 답을 현재 위치로 확정한다. O(N)
 import java.io.*;
 
-public class Solution {
+public class B3_Solution {
     private static InputStream is;
     private static final byte[] ibuf = new byte[1 << 16];
     private static int ipos = 0, ilen = 0;

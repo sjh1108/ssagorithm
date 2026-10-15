@@ -33,6 +33,7 @@ class Main {
       return;
     }
 
+    total /= 2;
     dfs();
     System.out.println(cnt);
   }
@@ -55,9 +56,9 @@ class Main {
           if(isOut(x, y) || !map[x][y]) continue;
 
           map[x][y] = false;
-          total -= 2;
+          --total;
           dfs();
-          total += 2;
+          ++total;
           map[x][y] = true;
         }
 

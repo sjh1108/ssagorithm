@@ -58,8 +58,8 @@ public class Main {
                 visited[cur] = true;
                 for(int next : graph[cur]) {
                     if(visited[next]) continue; // 이미 방문한 쉼터는 상위 쉼터임
-                    parent[next] = cur;
-                    stack[top++] = next; // 상위 쉼터 기록
+                    parent[next] = cur; // 상위 쉼터 기록
+                    stack[top++] = next;
                 }
             } else {
                 // 탈출 시점 : 하위 쉼터의 값이 모두 확정된 상태

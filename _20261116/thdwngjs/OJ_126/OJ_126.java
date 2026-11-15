@@ -1,3 +1,5 @@
+package _20261116.thdwngjs.OJ_126;
+
 import java.util.*;
 import java.io.*;
 
